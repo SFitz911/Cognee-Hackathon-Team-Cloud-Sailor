@@ -126,11 +126,11 @@ function buildGraph() {
     font: { color: "#8b8598", size: 11, face: "Inter" },
   }));
   nodes.push({
-    id: PINKY, label: "PINKY\n(the dog)", shape: "dot", size: 30, physics: false,
+    id: PINKY, label: "PINKY", shape: "dot", size: 14, physics: false,
     x: pinkyPos.x, y: pinkyPos.y,
     color: { background: "#3a1020", border: C("--magenta") },
-    font: { color: "#fff", size: 14, face: "Inter" }, borderWidth: 3,
-    shadow: { enabled: true, color: "rgba(255,61,139,0.6)", size: 22 },
+    font: { color: "#fff", size: 12, face: "Inter", vadjust: -2 }, borderWidth: 2,
+    shadow: { enabled: true, color: "rgba(255,61,139,0.6)", size: 16 },
   });
   gnodes = new vis.DataSet(nodes);
 

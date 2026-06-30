@@ -136,15 +136,23 @@ function styleClueNode(clue) {
   if (!gnodes || !clue.nodeId) return;
   const s = STATE_COLORS[clue.verdict] || STATE_COLORS.pending;
   const lit = clue.verdict === "true" || clue.verdict === "false";
+  // Node colour carries the verdict (amber pending / green true / red false).
   gnodes.update({ id: clue.nodeId,
     color: { background: s.bg, border: s.border },
     font: { color: s.font, size: 11, face: "Inter" },
     borderWidth: lit ? 3 : 2,
     shadow: { enabled: true, color: s.glow, size: lit ? 18 : 12 } });
+  // The PATH from Pinky is always her signature pink — a visible pink thread to
+  // every storyline node. Solid + glowing when confirmed true, faded for false,
+  // gently dashed while still unverified.
+  const PINK = C("--magenta") || "#ff3d8b";
+  const isTrue = clue.verdict === "true";
+  const isFalse = clue.verdict === "false";
   gedges.update({ id: "e" + clue.cid,
-    color: { color: s.border, highlight: s.border },
-    dashes: clue.verdict === "false" ? [2, 4] : (lit ? false : [3, 6]),
-    width: lit ? 2.8 : 1.4 });
+    color: { color: PINK, highlight: PINK, opacity: isFalse ? 0.4 : (isTrue ? 1 : 0.7) },
+    dashes: isFalse ? [4, 4] : (isTrue ? false : [2, 6]),
+    width: isTrue ? 3.2 : 1.8,
+    shadow: { enabled: isTrue, color: "rgba(255,61,139,0.7)", size: 14 } });
   // pending/checking nodes pulse; resolved ones stop.
   if (clue.verdict === "pending" || clue.verdict === "checking") pulseSet.add(clue.nodeId);
   else pulseSet.delete(clue.nodeId);

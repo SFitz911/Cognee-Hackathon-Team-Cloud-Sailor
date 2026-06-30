@@ -1,0 +1,23 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cognee_system/
+cognee_data/
+
+# Large generated media — clips/audio are regenerated, not version-controlled.
+# (Stills in media/images, including the poster, ARE committed so the app works on clone.)
+media/clips/*
+media/audio/*
+media/posters/*
+!media/**/.gitkeep
+
+# Enrolled faces (PII) and DeepFace caches — never commit
+media/faces/
+*.pkl

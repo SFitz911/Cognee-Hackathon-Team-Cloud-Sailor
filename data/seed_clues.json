@@ -1,0 +1,14 @@
+{
+  "case": "Hangover Berlin — the missing dog Pinky and the tattooed code to a gym in Serbia",
+  "clues": [
+    {"text": "A crumpled bar receipt from 'Zum Rosa Hund' bar in Kreuzberg, Berlin, timestamped 01:42, lists 6 beers and 2 Jagermeister.", "node_set": "verified"},
+    {"text": "A blurry phone photo at 02:15 shows Pinky the dog sitting on the bar next to a flyer that says 'Underground Dog Show - Saturday - Karlovci Gymnasium, Sremski Karlovci, Serbia'.", "node_set": "verified"},
+    {"text": "A receipt from 'Berlin Ink' tattoo parlor, timestamped 03:10, reads: 'one small numeric tattoo, client requested it placed on the dog's belly'.", "node_set": "verified"},
+    {"text": "A slurred voice memo on someone's phone: 'we put the code... on Pinky man... the locker code is tattooed on her belly... it's at the old gymnasium, the school in Serbia... don't lose the dog...'", "node_set": "timeline"},
+    {"text": "A FlixBus ticket, departed Berlin ZOB 04:20, destination Novi Sad, Serbia (Sremski Karlovci is a 20-minute ride from Novi Sad).", "node_set": "verified"},
+    {"text": "A stranger's number saved as 'Locker Guy - Markus' with a text: 'the prize is locked in locker 7 at the Karlovci Gymnasium in Sremski Karlovci, the code is on the dog, bring Pinky by 10am or you forfeit'.", "node_set": "verified"},
+    {"text": "Someone insists Pinky was last seen at the Berlin Zoo, but the zoo was closed by midnight and no ticket supports this.", "node_set": "all"},
+    {"text": "A visitor lanyard for 'Karlovačka gimnazija (Karlovci Gymnasium), founded 1791' is on the Worrier's wrist.", "node_set": "verified"}
+  ],
+  "demo_question": "Where is Pinky the dog, and how do we open the locker at the gymnasium?"
+}

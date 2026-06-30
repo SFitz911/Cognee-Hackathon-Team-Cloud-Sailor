@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security — Wolfpack Recall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <section class="view gate">
+    <header class="topbar">
+      <a href="/" class="btn btn-back">← poster</a>
+      <div class="brand">
+        <span class="brand-mark">WOLFPACK</span>
+        <span class="brand-sub">RECALL</span>
+      </div>
+      <div class="case-banner">
+        <span class="case-label">SECURITY CHECKPOINT</span>
+        <span class="case-title">Facial recognition required to access the memory database</span>
+      </div>
+      <div class="status" id="status">
+        <span class="dot" id="status-dot"></span>
+        <span id="status-text">checking scanner…</span>
+      </div>
+    </header>
+
+    <div class="gate-wrap">
+      <h1 class="gate-title">IDENTITY CHECK</h1>
+      <p class="gate-sub">Only enrolled members of the Wolfpack may open the database. Look into the camera.</p>
+
+      <div class="scanner" id="scanner">
+        <video id="video" autoplay playsinline muted></video>
+        <div class="scan-line" id="scan-line"></div>
+        <div class="scan-frame"></div>
+        <div class="scan-verdict" id="verdict"></div>
+      </div>
+      <canvas id="canvas" class="hidden"></canvas>
+
+      <div class="gate-controls">
+        <button id="start-cam" class="btn btn-ghost">◉ Start camera</button>
+        <input id="op-name" type="text" placeholder="operative name (for enroll)" />
+        <button id="enroll" class="btn btn-ghost" disabled>+ Enroll my face</button>
+        <button id="scan" class="btn btn-primary" disabled>🔓 SCAN TO ENTER</button>
+      </div>
+
+      <div class="gate-meta">
+        <span id="enrolled-info">enrolled: —</span>
+        <span id="gate-msg"></span>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/security.js"></script>
+</body>
+</html>

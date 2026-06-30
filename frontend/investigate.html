@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investigation — Wolfpack Recall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <section id="app" class="view app">
+    <header class="topbar">
+      <a href="/" class="btn btn-back">← poster</a>
+      <div class="brand">
+        <span class="brand-mark">WOLFPACK</span>
+        <span class="brand-sub">RECALL</span>
+      </div>
+      <div class="case-banner">
+        <span class="case-label">CASE FILE</span>
+        <span class="case-title">The Missing Dog &amp; The Tattooed Code — Berlin → Serbia</span>
+      </div>
+      <div class="status" id="status">
+        <span class="dot" id="status-dot"></span>
+        <span id="status-text">connecting…</span>
+      </div>
+    </header>
+
+    <!-- Centerpiece: big Pinky + big discovery-map graph -->
+    <div class="stage">
+      <figure class="suspect-big">
+        <img src="/images/pinky.png" alt="Pinky the dog" />
+        <figcaption>
+          <strong>PINKY</strong>
+          <span>Vizsla · the locker code is tattooed on her belly</span>
+        </figcaption>
+      </figure>
+
+      <h3 class="stage-label">THE NIGHT, MAPPED — discovered connections light up as clues land</h3>
+      <div class="graph-legend">
+        <span><i class="lg lg-lit"></i> discovered</span>
+        <span><i class="lg lg-dim"></i> undiscovered</span>
+        <span><i class="lg lg-refuted"></i> false lead</span>
+      </div>
+      <div id="graph" class="graph-big"></div>
+    </div>
+
+    <!-- Ask the wolfpack -->
+    <div class="ask-wrap">
+      <div class="ask-bar">
+        <input id="question" type="text"
+          value="Where is Pinky, and how do we open the locker at the gymnasium?"
+          placeholder="Ask the Wolfpack…" />
+        <button id="investigate" class="btn btn-primary">ASK THE WOLFPACK</button>
+      </div>
+      <details class="evidence-context" id="context-box">
+        <summary>Recalled evidence (Cognee GRAPH_COMPLETION)</summary>
+        <pre id="context-text">—</pre>
+      </details>
+      <div id="pack" class="pack"></div>
+    </div>
+
+    <!-- Evidence intake -->
+    <div class="evidence-wrap">
+      <div class="panel evidence">
+        <h2 class="panel-title">EVIDENCE LOCKER</h2>
+        <p class="panel-hint">Feed clues into Cognee memory. Each one is grounded into the knowledge graph — and lights up the map.</p>
+        <textarea id="clue-text" rows="3" placeholder="e.g. A FlixBus ticket, Berlin → Novi Sad, 04:20…"></textarea>
+        <div class="evidence-controls">
+          <select id="clue-nodeset" title="Memory lens">
+            <option value="verified">verified</option>
+            <option value="timeline">timeline</option>
+            <option value="all">all</option>
+          </select>
+          <button id="add-clue" class="btn btn-ghost">+ Remember</button>
+        </div>
+        <div class="seed-row"><button id="load-seed" class="btn btn-link">Load the case clue pack ↩</button></div>
+        <h3 class="sub">CLUES IN MEMORY <span id="clue-count" class="badge">0</span></h3>
+        <ul id="clue-list" class="clue-list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/investigate.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Wolfpack Recall — runtime dependencies.
+python-dotenv>=1.0
+
+# Backend: FastAPI + the 4-personality agent layer.
+# starlette pinned <0.39: fastapi 0.115 is incompatible with starlette 1.x.
+fastapi>=0.110,<0.116
+starlette>=0.37,<0.39
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+anthropic>=0.39
+
+# Page 3 — facial-recognition security gate.
+deepface>=0.0.93
+tf-keras
+
+# Poster generation via a free public Hugging Face Space (scripts/gen_poster_hf.py).
+gradio_client>=1.0

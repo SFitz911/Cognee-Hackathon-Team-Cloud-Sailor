@@ -1,0 +1,446 @@
+:root {
+  --bg: #0c0a0f;
+  --bg-panel: #141118;
+  --bg-panel-2: #1b1722;
+  --ink: #ece8f0;
+  --ink-dim: #9a93a6;
+  --ink-faint: #6b6478;
+  --line: #2a2533;
+  --rust: #c8612e;      /* Pinky's coat */
+  --magenta: #ff3d8b;   /* "Pinky" neon */
+  --cyan: #38e1d6;
+
+  /* persona accents (mirror backend Persona.color) */
+  --planner: #3b82f6;
+  --wildcard: #ef4444;
+  --worrier: #f59e0b;
+  --optimist: #22c55e;
+
+  --r: 14px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(255, 61, 139, 0.10), transparent 60%),
+    radial-gradient(800px 500px at -5% 110%, rgba(56, 225, 214, 0.07), transparent 55%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 999; opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- top bar ---- */
+.topbar {
+  display: flex; align-items: center; gap: 28px;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(20,17,24,0.9), rgba(12,10,15,0.6));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 50;
+}
+.brand { display: flex; align-items: baseline; gap: 8px; }
+.brand-mark {
+  font-family: "Bebas Neue", sans-serif; font-size: 30px; letter-spacing: 2px;
+  color: var(--magenta); line-height: 1;
+}
+.brand-sub {
+  font-family: "Bebas Neue", sans-serif; font-size: 30px; letter-spacing: 6px;
+  color: var(--ink); line-height: 1;
+}
+.case-banner { display: flex; flex-direction: column; gap: 2px; margin-left: 4px; }
+.case-label {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 3px;
+  color: var(--rust);
+}
+.case-title { font-size: 14px; color: var(--ink-dim); font-weight: 500; }
+
+.status {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-dim);
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-faint); box-shadow: 0 0 0 0 transparent; }
+.dot.ok { background: var(--optimist); box-shadow: 0 0 12px var(--optimist); }
+.dot.bad { background: var(--wildcard); box-shadow: 0 0 12px var(--wildcard); }
+
+/* ---- layout ---- */
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 340px;
+  gap: 18px; padding: 18px 28px 40px;
+  align-items: start;
+  max-width: 1640px; margin: 0 auto;
+}
+@media (max-width: 1180px) { .layout { grid-template-columns: 1fr; } }
+
+.panel {
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 20px;
+}
+.panel-title {
+  font-family: "Bebas Neue", sans-serif; letter-spacing: 3px; font-size: 20px;
+  margin: 0 0 4px; color: var(--ink);
+}
+.panel-hint { margin: 0 0 16px; font-size: 12.5px; color: var(--ink-faint); line-height: 1.5; }
+.sub {
+  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 2px;
+  color: var(--ink-dim); margin: 22px 0 10px; display: flex; align-items: center; gap: 8px;
+}
+.badge {
+  background: var(--rust); color: #1a0f08; font-weight: 700; border-radius: 999px;
+  font-size: 11px; padding: 1px 8px; font-family: "Inter", sans-serif;
+}
+
+/* ---- evidence intake ---- */
+textarea, input[type="text"], select {
+  width: 100%; background: #0c0a11; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px;
+  font-family: "Inter", sans-serif; font-size: 13.5px; resize: vertical;
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+textarea:focus, input:focus, select:focus {
+  outline: none; border-color: var(--magenta);
+  box-shadow: 0 0 0 3px rgba(255, 61, 139, 0.15);
+}
+.evidence-controls { display: flex; gap: 8px; margin-top: 10px; }
+.evidence-controls select { width: 130px; }
+
+.btn {
+  border: none; border-radius: 10px; padding: 11px 16px; cursor: pointer;
+  font-family: "Inter", sans-serif; font-weight: 600; font-size: 13px;
+  transition: transform .15s var(--ease), background .2s, box-shadow .2s, opacity .2s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--magenta), var(--rust));
+  color: #150a10; box-shadow: 0 6px 20px rgba(255, 61, 139, 0.25);
+  letter-spacing: 1px;
+}
+.btn-primary:hover { box-shadow: 0 8px 28px rgba(255, 61, 139, 0.4); }
+.btn-primary:disabled { opacity: .55; cursor: wait; }
+.btn-ghost { background: #241d2e; color: var(--ink); flex: 1; }
+.btn-ghost:hover { background: #2e2539; }
+.btn-link {
+  background: none; color: var(--cyan); padding: 6px 0; font-size: 12.5px; font-weight: 500;
+}
+.btn-link:hover { text-decoration: underline; }
+.seed-row { margin-top: 6px; }
+
+.clue-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.clue-list li {
+  background: #0e0c13; border: 1px solid var(--line); border-left: 3px solid var(--rust);
+  border-radius: 8px; padding: 9px 11px; font-size: 12.5px; color: var(--ink-dim);
+  line-height: 1.45; animation: slideIn .35s var(--ease);
+}
+.clue-list li .tag {
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 1px;
+  color: var(--ink-faint); display: block; margin-bottom: 3px;
+}
+.clue-list li.verified { border-left-color: var(--optimist); }
+.clue-list li.timeline { border-left-color: var(--cyan); }
+.clue-list li.all { border-left-color: var(--worrier); }
+
+/* ---- interrogation ---- */
+.ask-bar { display: flex; gap: 10px; }
+.ask-bar input { flex: 1; font-size: 14px; }
+.evidence-context {
+  margin: 14px 0 18px; border: 1px solid var(--line); border-radius: 10px;
+  background: #0c0a11; overflow: hidden;
+}
+.evidence-context summary {
+  cursor: pointer; padding: 10px 14px; font-family: "JetBrains Mono", monospace;
+  font-size: 11px; letter-spacing: 1px; color: var(--cyan);
+}
+.evidence-context pre {
+  margin: 0; padding: 0 14px 14px; white-space: pre-wrap; font-size: 12px;
+  color: var(--ink-dim); line-height: 1.55; font-family: "Inter", sans-serif;
+}
+
+.pack { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 720px) { .pack { grid-template-columns: 1fr; } }
+
+.persona {
+  background: #100d16; border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; position: relative; overflow: hidden;
+  border-top: 3px solid var(--accent, var(--line));
+  animation: rise .45s var(--ease) both;
+}
+.persona::after {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 60px;
+  background: radial-gradient(120px 60px at 24px 0, var(--accent), transparent 70%);
+  opacity: .14; pointer-events: none;
+}
+.persona-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.persona-avatar {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 18px; background: #0c0a11; border: 2px solid var(--accent);
+}
+.persona-name { font-weight: 700; font-size: 14px; }
+.persona-arche {
+  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 1px;
+  color: var(--ink-faint);
+}
+.persona-text { font-size: 13.5px; line-height: 1.6; color: var(--ink); }
+.persona.err .persona-text { color: var(--wildcard); font-family: "JetBrains Mono", monospace; font-size: 12px; }
+
+.persona.loading .persona-text::after {
+  content: "▍"; animation: blink 1s steps(1) infinite; color: var(--accent);
+}
+.skeleton { color: var(--ink-faint); font-style: italic; }
+
+/* ---- rail ---- */
+.suspect { margin: 0 0 8px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); position: relative; }
+.suspect img { width: 100%; display: block; aspect-ratio: 384/520; object-fit: cover; object-position: center 30%; }
+.suspect figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 12px;
+  background: linear-gradient(180deg, transparent, rgba(12,10,15,0.95));
+  display: flex; flex-direction: column; gap: 2px;
+}
+.suspect figcaption strong { font-family: "Bebas Neue", sans-serif; letter-spacing: 3px; font-size: 22px; color: var(--magenta); }
+.suspect figcaption span { font-size: 11.5px; color: var(--ink-dim); }
+
+.graph {
+  height: 320px; background: #09070c; border: 1px solid var(--line);
+  border-radius: 12px; overflow: hidden;
+}
+
+/* ---- animations ---- */
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* stagger persona cards */
+.persona:nth-child(1) { animation-delay: .02s; }
+.persona:nth-child(2) { animation-delay: .10s; }
+.persona:nth-child(3) { animation-delay: .18s; }
+.persona:nth-child(4) { animation-delay: .26s; }
+
+/* ============================================================
+   PAGE ROUTING
+   ============================================================ */
+.view { min-height: 100vh; }
+.hidden { display: none !important; }
+
+/* ============================================================
+   PAGE 1 — LANDING / MOVIE POSTER
+   ============================================================ */
+.landing {
+  position: relative;
+  background:
+    radial-gradient(1200px 700px at 50% -5%, rgba(255,61,139,0.22), transparent 55%),
+    radial-gradient(900px 600px at 12% 100%, rgba(56,225,214,0.16), transparent 55%),
+    radial-gradient(900px 600px at 90% 90%, rgba(200,97,46,0.18), transparent 55%),
+    #07060a;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.landing-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 32px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: 2px; color: var(--ink-dim); z-index: 3;
+}
+.logo-cognee { color: var(--magenta); }
+.logo-team { color: var(--cyan); }
+
+.poster {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 10px 20px 50px; position: relative; z-index: 2;
+}
+.poster-credits {
+  font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 4px;
+  color: var(--ink-faint); margin-bottom: 6px;
+}
+.poster-title { margin: 0; display: flex; flex-direction: column; align-items: center; line-height: 0.86; }
+.t-the { font-family: "Bebas Neue"; font-size: clamp(18px, 2.4vw, 30px); letter-spacing: 10px; color: var(--ink-dim); }
+.t-hang {
+  font-family: "Anton", sans-serif; font-size: clamp(48px, 11vw, 150px); letter-spacing: 1px;
+  color: #fff; text-shadow: 0 0 30px rgba(255,61,139,0.6), 0 4px 0 #2a1020;
+  -webkit-text-stroke: 2px rgba(255,61,139,0.35);
+}
+.t-part { font-family: "Bebas Neue"; font-size: clamp(14px, 2vw, 24px); letter-spacing: 8px; color: var(--rust); margin: 6px 0; }
+.t-berlin {
+  font-family: "Anton", sans-serif; font-size: clamp(60px, 16vw, 230px); letter-spacing: 2px;
+  background: linear-gradient(180deg, #ff5ea0 0%, #ff3d8b 40%, var(--rust) 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 40px rgba(255,61,139,0.45));
+}
+.poster-tag {
+  font-family: "Inter"; font-size: clamp(14px, 1.6vw, 19px); color: var(--ink); font-weight: 500;
+  margin: 14px 0 8px; max-width: 640px;
+}
+.hero-stage { position: relative; margin: 10px 0 6px; display: grid; place-items: center; }
+.spotlight {
+  position: absolute; width: 460px; height: 460px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,61,139,0.30), transparent 62%);
+  filter: blur(8px); animation: pulse 4s var(--ease) infinite;
+}
+.hero-poster {
+  height: clamp(340px, 56vh, 620px); width: auto; border-radius: 16px;
+  object-fit: cover; position: relative; z-index: 2;
+  border: 1px solid rgba(255,61,139,0.45);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 70px rgba(255,61,139,0.3);
+  animation: floaty 6s ease-in-out infinite;
+}
+.hero-badge {
+  position: absolute; right: max(8vw, 20px); top: 20px; z-index: 3;
+  font-family: "Bebas Neue"; font-size: 13px; letter-spacing: 2px; color: var(--ink-dim);
+  background: rgba(12,10,15,0.7); border: 1px solid var(--magenta); border-radius: 10px;
+  padding: 8px 12px; transform: rotate(6deg); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.hero-badge b { font-size: 22px; color: var(--magenta); }
+.cast { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 22px 0 10px; }
+.cast-member { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 92px; }
+.cast-member img {
+  width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--accent, var(--line)); transition: transform .25s var(--ease), box-shadow .25s;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+.cast-member:hover img { transform: translateY(-6px) scale(1.08) rotate(-3deg); box-shadow: 0 12px 28px var(--accent); }
+.cast-role { font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 1px; color: var(--accent); }
+.cast-name { font-size: 10px; color: var(--ink-faint); }
+.cast-member.cameo img { border-color: var(--cyan); }
+.btn-cta {
+  margin-top: 22px; font-family: "Bebas Neue"; font-size: 22px; letter-spacing: 3px;
+  padding: 16px 38px; color: #150a10;
+  background: linear-gradient(135deg, var(--magenta), var(--rust));
+  box-shadow: 0 10px 40px rgba(255,61,139,0.45); border-radius: 12px;
+}
+.btn-cta:hover { box-shadow: 0 14px 56px rgba(255,61,139,0.7); transform: translateY(-2px); }
+.poster-foot { margin-top: 18px; font-size: 12px; color: var(--ink-faint); }
+.poster-foot b { color: var(--magenta); }
+.confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.confetti::before, .confetti::after {
+  content: ""; position: absolute; inset: -20% 0 0 0;
+  background-image:
+    radial-gradient(3px 3px at 20% 10%, var(--magenta), transparent),
+    radial-gradient(3px 3px at 70% 20%, var(--cyan), transparent),
+    radial-gradient(2px 2px at 40% 30%, var(--rust), transparent),
+    radial-gradient(3px 3px at 90% 15%, #fff, transparent),
+    radial-gradient(2px 2px at 55% 5%, var(--magenta), transparent),
+    radial-gradient(2px 2px at 10% 25%, var(--cyan), transparent);
+  background-size: 100% 100%; opacity: 0.5;
+  animation: fall 9s linear infinite;
+}
+.confetti::after { animation-duration: 13s; animation-delay: -4s; opacity: 0.3; }
+
+/* ============================================================
+   PAGE 2 — CENTERED STAGE (big dog + big graph)
+   ============================================================ */
+.btn-back { background: #241d2e; color: var(--ink); font-size: 12px; padding: 8px 14px; margin-right: 6px; }
+.btn-back:hover { background: #2e2539; }
+.stage {
+  max-width: 860px; margin: 28px auto 10px; padding: 0 20px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.suspect-big {
+  margin: 0; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,61,139,0.35);
+  position: relative; max-width: 460px; width: 100%;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55), 0 0 50px rgba(255,61,139,0.18);
+}
+.suspect-big img { width: 100%; display: block; aspect-ratio: 384/520; object-fit: cover; object-position: center 28%; }
+.suspect-big figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 18px 16px;
+  background: linear-gradient(180deg, transparent, rgba(7,6,10,0.95));
+  display: flex; flex-direction: column; gap: 3px;
+}
+.suspect-big figcaption strong { font-family: "Bebas Neue"; letter-spacing: 4px; font-size: 34px; color: var(--magenta); }
+.suspect-big figcaption span { font-size: 13px; color: var(--ink-dim); }
+.stage-label {
+  font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 2px;
+  color: var(--ink-dim); margin: 30px 0 12px;
+}
+.graph-big {
+  width: 100%; height: 440px; background: #09070c;
+  border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
+}
+.graph-legend {
+  display: flex; gap: 18px; justify-content: center; margin: 0 0 12px;
+  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-faint);
+}
+.graph-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lg { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.lg-lit { background: #10241a; border: 2px solid #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.7); }
+.lg-dim { background: #161320; border: 2px solid #2a2533; }
+.lg-refuted { background: #241016; border: 2px solid #b3415f; }
+.ask-wrap, .evidence-wrap { max-width: 980px; margin: 0 auto; padding: 18px 20px; }
+.ask-wrap { margin-top: 10px; }
+.evidence-wrap .evidence { max-width: 560px; margin: 0 auto; }
+
+/* ============================================================
+   LANDING ANIMATIONS
+   ============================================================ */
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes pulse { 0%,100% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 0.9; transform: scale(1.05); } }
+@keyframes fall { from { transform: translateY(-10%);} to { transform: translateY(110%);} }
+
+/* ============================================================
+   PAGE 3 — FACE-GATE SECURITY
+   ============================================================ */
+.gate { display: flex; flex-direction: column; }
+.gate-wrap {
+  max-width: 720px; margin: 30px auto; padding: 0 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.gate-title {
+  font-family: "Anton", sans-serif; font-size: clamp(34px, 6vw, 64px); letter-spacing: 2px;
+  margin: 6px 0; color: #fff; text-shadow: 0 0 30px rgba(34,197,94,0.4);
+}
+.gate-sub { color: var(--ink-dim); font-size: 14px; margin: 0 0 22px; max-width: 460px; }
+
+.scanner {
+  position: relative; width: min(440px, 86vw); aspect-ratio: 4/3; border-radius: 16px;
+  overflow: hidden; background: #050409; border: 1px solid var(--line);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+}
+.scanner video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.05) saturate(1.05); }
+.scan-frame {
+  position: absolute; inset: 14%; border: 2px solid rgba(34,225,214,0.5); border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(5,4,9,0.35) inset; pointer-events: none;
+}
+.scan-frame::before, .scan-frame::after {
+  content: ""; position: absolute; width: 22px; height: 22px; border: 3px solid var(--cyan);
+}
+.scan-frame::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.scan-frame::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+.scan-line {
+  position: absolute; left: 0; right: 0; top: 0; height: 3px; opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--optimist), transparent);
+  box-shadow: 0 0 16px var(--optimist);
+}
+.scanner.scanning .scan-line { opacity: 1; animation: scanmove 1.6s ease-in-out infinite; }
+.scanner.scanning .scan-frame { border-color: var(--optimist); }
+.scan-verdict {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; pointer-events: none;
+  font-family: "Bebas Neue"; font-size: 30px; letter-spacing: 3px;
+  background: rgba(5,4,9,0.55); transition: opacity .25s var(--ease);
+}
+.scan-verdict.show { opacity: 1; }
+.scan-verdict.ok { color: var(--optimist); text-shadow: 0 0 20px var(--optimist); }
+.scan-verdict.bad { color: var(--wildcard); text-shadow: 0 0 20px var(--wildcard); }
+
+.gate-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 22px 0 10px; }
+.gate-controls input { width: 220px; }
+.gate-meta {
+  display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
+  font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-faint);
+}
+.gate-meta .ok { color: var(--optimist); }
+.gate-meta .bad { color: var(--wildcard); }
+
+@keyframes scanmove { 0%,100% { top: 12%; } 50% { top: 86%; } }

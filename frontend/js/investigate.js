@@ -9,8 +9,13 @@ const PERSONA_META = {
   optimist: { emoji: "🌅", arche: "the optimist" },
 };
 
+const C = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
 /* ============================ CLUES ============================ */
+// Every clue is a real, dynamic node under Pinky — nothing is hard-coded.
+// State drives its colour: pending (amber) -> true (green) / false (red).
 const clues = [];
+let clueSeq = 0;
 
 function renderClues() {
   $("#clue-count").textContent = clues.length;
@@ -18,154 +23,145 @@ function renderClues() {
   ul.innerHTML = "";
   for (const c of clues.slice().reverse()) {
     const li = document.createElement("li");
-    li.className = c.node_set;
-    li.innerHTML = `<span class="tag">${c.node_set} · ${c.state}</span>${escapeHtml(c.text)}`;
+    li.className = `${c.node_set} verdict-${c.verdict}`;
+    li.innerHTML = `
+      <span class="tag">${c.node_set} · ${c.state}${c.verdict !== "pending" ? " · " + c.verdict.toUpperCase() : ""}</span>
+      <span class="clue-body">${escapeHtml(c.text)}</span>
+      ${c.reason ? `<span class="clue-reason">↳ ${escapeHtml(c.reason)}</span>` : ""}
+      <span class="clue-actions">
+        <button class="mini ok"  data-cid="${c.cid}" data-act="true"  title="Mark true">✓ true</button>
+        <button class="mini bad" data-cid="${c.cid}" data-act="false" title="Mark false">✗ false</button>
+        <button class="mini chk" data-cid="${c.cid}" data-act="check" title="Fact-check against Cognee memory">🔍 check</button>
+      </span>`;
     ul.appendChild(li);
   }
 }
 
 async function addClue(text, node_set) {
-  if (!text.trim()) return;
-  const entry = { text, node_set, state: "remembering…" };
-  clues.push(entry);
+  text = text.trim();
+  if (!text) return;
+  const clue = {
+    cid: ++clueSeq, text, node_set,
+    state: "remembering…", verdict: "pending", reason: "", nodeId: null,
+  };
+  clues.push(clue);
+  addClueNode(clue);          // appears under Pinky immediately
   renderClues();
-  revealForClue(text); // light up the map immediately (optimistic)
   try {
     const res = await api("/clues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, node_set, wait: true }),
     });
-    entry.state = res.queryable ? "in memory" : (res.cognify || "accepted");
+    clue.state = res.queryable ? "in memory" : (res.cognify || "accepted");
   } catch (e) {
-    entry.state = "error";
+    clue.state = "error";
   }
   renderClues();
 }
 
-/* ====================== DISCOVERY-MAP GRAPH ====================== */
+function clueByCid(cid) {
+  return clues.find((c) => String(c.cid) === String(cid));
+}
+
+/* Mark a clue true/false manually, or fact-check it against Cognee memory. */
+function setVerdict(clue, verdict, reason) {
+  clue.verdict = verdict;
+  if (reason !== undefined) clue.reason = reason;
+  styleClueNode(clue);
+  renderClues();
+}
+
+async function checkClue(clue) {
+  setVerdict(clue, "checking", "Fact-checking against the case memory…");
+  try {
+    const r = await api("/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: clue.text }),
+    });
+    if (r.detail) return setVerdict(clue, "pending", `check failed: ${r.detail}`);
+    const v = ["true", "false", "unknown"].includes(r.verdict) ? r.verdict : "unknown";
+    setVerdict(clue, v, r.reason || "");
+  } catch (e) {
+    setVerdict(clue, "pending", `check error: ${e}`);
+  }
+}
+
+/* ====================== DYNAMIC GRAPH (Pinky + clue nodes) ====================== */
 const LIT = "#22c55e";
-const C = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-
-const NODE_DEFS = {
-  pinky:  { label: "Pinky\n(dog)", shape: "dot", size: 26 },
-  code:   { label: "Locker code\n(belly tattoo)", shape: "diamond", size: 18 },
-  bar:    { label: "Zum Rosa Hund\n(bar · Berlin)", shape: "dot", size: 16 },
-  tattoo: { label: "Berlin Ink\n(tattoo parlor)", shape: "dot", size: 16 },
-  bus:    { label: "FlixBus\nBerlin → Novi Sad", shape: "dot", size: 16 },
-  gym:    { label: "Karlovci Gymnasium\nLocker 7 · Serbia", shape: "square", size: 22 },
-  markus: { label: "Markus\n(locker guy)", shape: "dot", size: 16 },
-  zoo:    { label: "Berlin Zoo\n(false lead)", shape: "dot", size: 12, refuted: true },
-};
-const EDGE_DEFS = {
-  e_pc: { from: "pinky", to: "code", label: "carries" },
-  e_cg: { from: "code", to: "gym", label: "opens" },
-  e_pb: { from: "pinky", to: "bar", label: "seen at" },
-  e_pt: { from: "pinky", to: "tattoo", label: "tattooed at" },
-  e_mg: { from: "markus", to: "gym", label: "guards" },
-  e_mp: { from: "markus", to: "pinky", label: "wants by 10am" },
-  e_bb: { from: "bar", to: "bus", label: "" },
-  e_bg: { from: "bus", to: "gym", label: "to Serbia" },
-  e_pz: { from: "pinky", to: "zoo", label: "false lead", refuted: true },
-};
-
+const PINKY = "pinky";
 let gnodes, gedges, net;
-const revealed = new Set();
-const pulseStart = new Map(); // id -> start ts (ms)
-const PULSE_MS = 3200;
+const pulseSet = new Set();      // node ids currently pulsing (pending)
+const STATE_COLORS = {
+  pending:  { bg: "#241f10", border: "#f59e0b", font: "#f4d39a", glow: "rgba(245,158,11,0.55)" },
+  checking: { bg: "#241f10", border: "#f59e0b", font: "#f4d39a", glow: "rgba(245,158,11,0.7)" },
+  true:     { bg: "#10241a", border: LIT,       font: "#dff6e8", glow: "rgba(34,197,94,0.6)" },
+  false:    { bg: "#241016", border: "#ef4444", font: "#f2b8b8", glow: "rgba(239,68,68,0.6)" },
+  unknown:  { bg: "#141320", border: "#38e1d6", font: "#bdeee9", glow: "rgba(56,225,214,0.5)" },
+};
 
-function nodeStyle(id) {
-  const def = NODE_DEFS[id];
-  const base = { id, label: def.label, shape: def.shape, size: def.size,
-    font: { multi: false, size: 11, face: "Inter" }, borderWidth: 1 };
-  if (!revealed.has(id)) {
-    return { ...base, color: { background: "#161320", border: "#2a2533" },
-      font: { ...base.font, color: "#5c5870" }, shadow: false };
-  }
-  if (def.refuted) {
-    return { ...base, color: { background: "#241016", border: "#b3415f" },
-      font: { ...base.font, color: "#caa0ac" }, borderWidth: 1.5, shadow: false };
-  }
-  return { ...base, color: { background: "#10241a", border: LIT },
-    font: { ...base.font, color: "#dff6e8" }, borderWidth: 2,
-    shadow: { enabled: true, color: "rgba(34,197,94,0.55)", size: 18 } };
-}
-
-function edgeStyle(id) {
-  const def = EDGE_DEFS[id];
-  const base = { id, from: def.from, to: def.to, label: def.label,
-    font: { size: 9, strokeWidth: 0, face: "JetBrains Mono", color: "#5c5870" },
-    arrows: { to: { enabled: true, scaleFactor: 0.5 } }, smooth: { type: "continuous" } };
-  if (!revealed.has(id)) {
-    return { ...base, color: { color: "rgba(120,116,140,0.18)" }, dashes: [3, 6], width: 1 };
-  }
-  if (def.refuted) {
-    return { ...base, color: { color: "#b3415f" }, dashes: [2, 4], width: 1.6,
-      font: { ...base.font, color: "#b3415f" } };
-  }
-  return { ...base, color: { color: LIT, highlight: LIT }, dashes: false, width: 2.8,
-    font: { ...base.font, color: "#7fdca0" } };
-}
+function shorten(s, n) { return s.length > n ? s.slice(0, n - 1) + "…" : s; }
 
 function buildGraph() {
   const el = $("#graph");
   if (!window.vis || !el) return;
-  gnodes = new vis.DataSet(Object.keys(NODE_DEFS).map(nodeStyle));
-  gedges = new vis.DataSet(Object.keys(EDGE_DEFS).map(edgeStyle));
+  gnodes = new vis.DataSet([{
+    id: PINKY, label: "PINKY\n(the dog)", shape: "dot", size: 32,
+    color: { background: "#3a1020", border: C("--magenta") },
+    font: { color: "#fff", size: 14, face: "Inter" }, borderWidth: 3,
+    shadow: { enabled: true, color: "rgba(255,61,139,0.6)", size: 22 },
+  }]);
+  gedges = new vis.DataSet([]);
   net = new vis.Network(el, { nodes: gnodes, edges: gedges }, {
-    physics: { barnesHut: { gravitationalConstant: -4800, springLength: 120 }, stabilization: { iterations: 200 } },
+    physics: { barnesHut: { gravitationalConstant: -5200, springLength: 130 }, stabilization: { iterations: 160 } },
     interaction: { hover: true, dragView: true, zoomView: true },
   });
-  reveal(["pinky"], []);   // the subject is known from the start
   requestAnimationFrame(pulseTick);
 }
 
-function reveal(nodeIds, edgeIds) {
-  const now = performance.now();
-  for (const id of nodeIds) {
-    if (!NODE_DEFS[id]) continue;
-    const fresh = !revealed.has(id);
-    revealed.add(id);
-    gnodes.update(nodeStyle(id));
-    if (fresh && !NODE_DEFS[id].refuted) pulseStart.set(id, now);
-  }
-  for (const id of edgeIds) {
-    if (!EDGE_DEFS[id]) continue;
-    revealed.add(id);
-    gedges.update(edgeStyle(id));
-  }
+function addClueNode(clue) {
+  if (!gnodes) return;
+  const nid = "n" + clue.cid;
+  clue.nodeId = nid;
+  gnodes.add({ id: nid, label: shorten(clue.text, 38), title: clue.text,
+    shape: "dot", size: 16, font: { size: 11, face: "Inter" } });
+  gedges.add({ id: "e" + clue.cid, from: PINKY, to: nid,
+    font: { size: 9, face: "JetBrains Mono" },
+    arrows: { to: { enabled: true, scaleFactor: 0.5 } }, smooth: { type: "continuous" } });
+  styleClueNode(clue);
+}
+
+function styleClueNode(clue) {
+  if (!gnodes || !clue.nodeId) return;
+  const s = STATE_COLORS[clue.verdict] || STATE_COLORS.pending;
+  const lit = clue.verdict === "true" || clue.verdict === "false";
+  gnodes.update({ id: clue.nodeId,
+    color: { background: s.bg, border: s.border },
+    font: { color: s.font, size: 11, face: "Inter" },
+    borderWidth: lit ? 3 : 2,
+    shadow: { enabled: true, color: s.glow, size: lit ? 18 : 12 } });
+  gedges.update({ id: "e" + clue.cid,
+    color: { color: s.border, highlight: s.border },
+    dashes: clue.verdict === "false" ? [2, 4] : (lit ? false : [3, 6]),
+    width: lit ? 2.8 : 1.4 });
+  // pending/checking nodes pulse; resolved ones stop.
+  if (clue.verdict === "pending" || clue.verdict === "checking") pulseSet.add(clue.nodeId);
+  else pulseSet.delete(clue.nodeId);
 }
 
 function pulseTick() {
-  if (gnodes) {
+  if (gnodes && pulseSet.size) {
     const now = performance.now();
+    const phase = (Math.sin(now / 180) + 1) / 2;
     const updates = [];
-    for (const [id, t0] of pulseStart) {
-      const dt = now - t0;
-      if (dt > PULSE_MS) { pulseStart.delete(id); updates.push(nodeStyle(id)); continue; }
-      const phase = (Math.sin(dt / 150) + 1) / 2; // 0..1
-      updates.push({ id, borderWidth: 2 + phase * 3,
-        shadow: { enabled: true, color: LIT, size: 14 + phase * 26 } });
+    for (const id of pulseSet) {
+      updates.push({ id, borderWidth: 2 + phase * 2,
+        shadow: { enabled: true, color: "rgba(245,158,11,0.7)", size: 10 + phase * 18 } });
     }
-    if (updates.length) gnodes.update(updates);
+    gnodes.update(updates);
   }
   requestAnimationFrame(pulseTick);
-}
-
-/* Map a clue's text to the graph elements it discovers. */
-function revealForClue(text) {
-  const t = text.toLowerCase();
-  const N = new Set(), E = new Set();
-  const add = (ns, es) => { ns.forEach((n) => N.add(n)); es.forEach((e) => E.add(e)); };
-  if (/tattoo|belly|ink/.test(t)) add(["tattoo", "pinky", "code"], ["e_pt", "e_pc"]);
-  if (/voice memo|code|belly|gym|gymnasium|locker/.test(t)) add(["code", "gym", "pinky"], ["e_pc", "e_cg"]);
-  if (/flixbus|\bbus\b|novi sad|serbia/.test(t)) add(["bus", "bar", "gym"], ["e_bb", "e_bg"]);
-  if (/markus|locker guy|locker 7/.test(t)) add(["markus", "gym", "code", "pinky"], ["e_mg", "e_mp", "e_cg"]);
-  if (/photo|flyer|dog show/.test(t)) add(["pinky", "bar", "gym"], ["e_pb"]);
-  if (/receipt|rosa hund|beers|bar\b/.test(t)) add(["bar"], []);
-  if (/lanyard|gimnazija|gymnasium|karlovci/.test(t)) add(["gym"], []);
-  if (/zoo/.test(t)) add(["zoo"], ["e_pz"]);
-  reveal([...N], [...E]);
 }
 
 /* ====================== INVESTIGATION ====================== */
@@ -260,6 +256,17 @@ $("#add-clue").addEventListener("click", () => {
 });
 $("#investigate").addEventListener("click", investigate);
 $("#load-seed").addEventListener("click", loadSeed);
+
+// Delegated clue actions: ✓ true · ✗ false · 🔍 check (Cognee fact-check).
+$("#clue-list").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-cid]");
+  if (!btn) return;
+  const clue = clueByCid(btn.dataset.cid);
+  if (!clue) return;
+  if (btn.dataset.act === "true") setVerdict(clue, "true", "Marked true by investigator.");
+  else if (btn.dataset.act === "false") setVerdict(clue, "false", "Marked false by investigator.");
+  else if (btn.dataset.act === "check") checkClue(clue);
+});
 
 buildGraph();
 refreshStatus();

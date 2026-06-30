@@ -155,6 +155,22 @@ textarea:focus, input:focus, select:focus {
 .clue-list li.verified { border-left-color: var(--optimist); }
 .clue-list li.timeline { border-left-color: var(--cyan); }
 .clue-list li.all { border-left-color: var(--worrier); }
+/* verdict overrides the lens colour once a clue is judged */
+.clue-list li.verdict-true { border-left-color: #22c55e; }
+.clue-list li.verdict-false { border-left-color: #ef4444; }
+.clue-list li.verdict-pending, .clue-list li.verdict-checking { border-left-color: #f59e0b; }
+.clue-body { display: block; }
+.clue-reason { display: block; margin-top: 4px; font-size: 11px; color: var(--ink-faint); font-style: italic; }
+.clue-actions { display: flex; gap: 6px; margin-top: 8px; }
+.mini {
+  border: 1px solid var(--line); background: #14111a; color: var(--ink-dim);
+  border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: 600; cursor: pointer;
+  font-family: "Inter", sans-serif; transition: all .15s var(--ease);
+}
+.mini:hover { transform: translateY(-1px); }
+.mini.ok:hover { background: rgba(34,197,94,0.18); color: #7fdca0; border-color: #22c55e; }
+.mini.bad:hover { background: rgba(239,68,68,0.18); color: #f2b8b8; border-color: #ef4444; }
+.mini.chk:hover { background: rgba(56,225,214,0.16); color: var(--cyan); border-color: var(--cyan); }
 
 /* ---- interrogation ---- */
 .ask-bar { display: flex; gap: 10px; }
@@ -384,7 +400,8 @@ textarea:focus, input:focus, select:focus {
 .lg { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .lg-lit { background: #10241a; border: 2px solid #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.7); }
 .lg-dim { background: #161320; border: 2px solid #2a2533; }
-.lg-refuted { background: #241016; border: 2px solid #b3415f; }
+.lg-pending { background: #241f10; border: 2px solid #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.7); }
+.lg-refuted { background: #241016; border: 2px solid #ef4444; }
 .ask-wrap, .evidence-wrap { max-width: 980px; margin: 0 auto; padding: 18px 20px; }
 .ask-wrap { margin-top: 10px; }
 .evidence-wrap .evidence { max-width: 560px; margin: 0 auto; }

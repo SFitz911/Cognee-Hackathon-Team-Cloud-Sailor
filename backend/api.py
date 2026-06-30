@@ -66,6 +66,10 @@ class InvestigateIn(BaseModel):
     top_k: int = Field(8, ge=1, le=20)
 
 
+class ValidateIn(BaseModel):
+    text: str = Field(..., min_length=1, description="A clue/statement to fact-check against memory")
+
+
 class FaceEnrollIn(BaseModel):
     name: str = Field("operative", description="Operative name to store the face under")
     image: str = Field(..., min_length=1, description="Webcam frame as a data URL / base64")
@@ -114,6 +118,16 @@ def investigate(req: InvestigateIn) -> dict:
         raise HTTPException(status_code=503, detail=str(e)) from e
     result = pack.investigate(req.question, top_k=req.top_k)
     return result.to_dict()
+
+
+@app.post("/validate")
+def validate(req: ValidateIn) -> dict:
+    """Fact-check a clue against the Cognee case memory -> true | false | unknown."""
+    try:
+        pack = get_wolfpack()
+    except CogneeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+    return pack.validate(req.text)
 
 
 @app.get("/memory/search")

@@ -157,3 +157,49 @@ class Wolfpack:
             context=context,
             turns=turns,
         )
+
+    # -- single-clue validation against the memory graph ---------------------
+    def validate(self, statement: str, *, top_k: int = 10) -> dict:
+        """Judge a statement against the established case memory.
+
+        Returns {"verdict": "true"|"false"|"unknown", "reason": str}. "true" =
+        supported/consistent with the Cognee memory; "false" = contradicted.
+        """
+        try:
+            hits = self.cognee.recall(self.EVIDENCE_QUERY, top_k=top_k)
+        except CogneeError as e:
+            if "prerequisites not met" in str(e) or "HTTP 404" in str(e):
+                hits = []
+            else:
+                raise
+        context = _format_clues(hits)
+
+        system = (
+            "You are the case fact-checker for a missing-dog investigation. Using ONLY the "
+            "established case memory, judge whether a new statement is TRUE (supported by or "
+            "consistent with the memory), FALSE (contradicted by the memory), or UNKNOWN "
+            "(no evidence either way). Reply with exactly one word — TRUE, FALSE, or UNKNOWN — "
+            "then a dash and one short sentence of justification grounded in the clues."
+        )
+        user = f"CASE MEMORY:\n{context}\n\nSTATEMENT TO CHECK:\n{statement}"
+        kwargs: dict = {
+            "model": self.model,
+            "max_tokens": 120,
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+        }
+        if _supports_temperature(self.model):
+            kwargs["temperature"] = 0.0
+        resp = self._client.messages.create(**kwargs)
+        text = "".join(b.text for b in resp.content if b.type == "text").strip()
+
+        head = text.lstrip().split(None, 1)[0].upper().strip(".:,-—–") if text else ""
+        verdict = head.lower() if head in {"TRUE", "FALSE", "UNKNOWN"} else "unknown"
+        # Strip a leading "TRUE/FALSE/UNKNOWN" word and any dash/colon separator.
+        reason = text.strip()
+        for token in ("TRUE", "FALSE", "UNKNOWN"):
+            if reason.upper().startswith(token):
+                reason = reason[len(token):]
+                break
+        reason = reason.lstrip(" .:—–-\t")
+        return {"verdict": verdict, "reason": reason or "No justification returned."}

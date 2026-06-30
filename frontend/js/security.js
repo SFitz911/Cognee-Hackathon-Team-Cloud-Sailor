@@ -21,17 +21,60 @@ async function refreshAuthStatus() {
   }
 }
 
+function cameraSupported() {
+  // getUserMedia only exists in a secure context (https or localhost/127.0.0.1).
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+
 async function startCamera() {
+  if (!cameraSupported()) {
+    const host = location.hostname;
+    const insecure = location.protocol !== "https:" && host !== "localhost" && host !== "127.0.0.1";
+    setMsg(
+      insecure
+        ? `Camera needs a secure origin. You're on "${location.host}" — open the app at http://localhost:8000 (or 127.0.0.1) instead of a LAN IP.`
+        : "This browser blocks camera access here. Try Chrome/Edge over http://localhost:8000.",
+      "bad"
+    );
+    return;
+  }
+  setMsg("Requesting camera… click Allow in the browser prompt.");
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-    $("#video").srcObject = stream;
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+    const v = $("#video");
+    v.srcObject = stream;
+    await v.play().catch(() => {});
     $("#enroll").disabled = false;
     $("#scan").disabled = false;
     $("#start-cam").textContent = "◉ Camera on";
     $("#start-cam").disabled = true;
+    setMsg("Camera ready. Enroll your face, then scan to enter.", "ok");
   } catch (e) {
-    setMsg(`Camera blocked: ${e.message}. Allow camera access and reload.`, "bad");
+    setMsg(cameraErrorHelp(e), "bad");
+    $("#start-cam").textContent = "◉ Retry camera";
+    $("#start-cam").disabled = false;
   }
+}
+
+function cameraErrorHelp(e) {
+  const name = e && e.name ? e.name : "";
+  switch (name) {
+    case "NotAllowedError":
+    case "SecurityError":
+      return "Permission denied. Click the camera icon in the address bar → Allow, then click Retry. " +
+why_blocked();
+    case "NotFoundError":
+    case "OverconstrainedError":
+      return "No usable camera found. Plug in / enable a webcam and click Retry.";
+    case "NotReadableError":
+      return "Camera is busy or blocked by the OS. Close other apps using it, and on Windows check " +
+        "Settings → Privacy & security → Camera (allow desktop apps), then Retry.";
+    default:
+      return `Camera error (${name || "unknown"}): ${e.message || e}. Click Retry.`;
+  }
+}
+function why_blocked() {
+  return "If you don't see a prompt, the site's camera permission may be set to Block.";
 }
 
 function captureFrame() {
@@ -118,3 +161,12 @@ $("#scan").addEventListener("click", scanToEnter);
 
 refreshAuthStatus();
 setInterval(refreshAuthStatus, 8000);
+
+// Warn up front if the page can't access a camera here.
+if (!cameraSupported()) {
+  setMsg(
+    `Heads up: camera needs http://localhost:8000 or 127.0.0.1 (you're on "${location.host}"). ` +
+    "Open it there, then Start camera.",
+    "bad"
+  );
+}

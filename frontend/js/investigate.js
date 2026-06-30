@@ -103,33 +103,85 @@ const STATE_COLORS = {
 
 function shorten(s, n) { return s.length > n ? s.slice(0, n - 1) + "…" : s; }
 
+/* The fixed storyline ROUTE (drawn in light gray). Pinky travels along it. */
+const ROUTE = [
+  { id: "r_apt", label: "Apartment\n(Berlin)",             x: -390, y: 120 },
+  { id: "r_bar", label: "Zum Rosa Hund\n(bar · Berlin)",   x: -195, y: -70 },
+  { id: "r_ink", label: "Berlin Ink\n(tattoo parlor)",     x: 5,    y: 100 },
+  { id: "r_bus", label: "FlixBus\nBerlin → Novi Sad",      x: 200,  y: -70 },
+  { id: "r_gym", label: "Karlovci Gymnasium\nLocker 7 · Serbia", x: 400, y: 110 },
+];
+const ROUTE_PTS = ROUTE.map((r) => ({ x: r.x, y: r.y }));
+let pinkyPos = { x: ROUTE[0].x, y: ROUTE[0].y - 55 };
+let routeProgress = 0; // eased 0..1 position along the route
+
 function buildGraph() {
   const el = $("#graph");
   if (!window.vis || !el) return;
-  gnodes = new vis.DataSet([{
-    id: PINKY, label: "PINKY\n(the dog)", shape: "dot", size: 32,
+
+  const nodes = ROUTE.map((r) => ({
+    id: r.id, label: r.label, x: r.x, y: r.y, fixed: true, physics: false,
+    shape: "dot", size: 13,
+    color: { background: "#15131b", border: "#4a4658" },
+    font: { color: "#8b8598", size: 11, face: "Inter" },
+  }));
+  nodes.push({
+    id: PINKY, label: "PINKY\n(the dog)", shape: "dot", size: 30, physics: false,
+    x: pinkyPos.x, y: pinkyPos.y,
     color: { background: "#3a1020", border: C("--magenta") },
     font: { color: "#fff", size: 14, face: "Inter" }, borderWidth: 3,
     shadow: { enabled: true, color: "rgba(255,61,139,0.6)", size: 22 },
-  }]);
-  gedges = new vis.DataSet([]);
+  });
+  gnodes = new vis.DataSet(nodes);
+
+  // Light-gray route edges connecting the waypoints in story order.
+  const routeEdges = [];
+  for (let i = 0; i < ROUTE.length - 1; i++) {
+    routeEdges.push({ id: "route" + i, from: ROUTE[i].id, to: ROUTE[i + 1].id,
+      color: { color: "rgba(150,146,165,0.35)" }, width: 2, dashes: [6, 6],
+      arrows: { to: { enabled: true, scaleFactor: 0.4 } }, smooth: false, physics: false });
+  }
+  gedges = new vis.DataSet(routeEdges);
+
   net = new vis.Network(el, { nodes: gnodes, edges: gedges }, {
-    physics: { barnesHut: { gravitationalConstant: -5200, springLength: 130 }, stabilization: { iterations: 160 } },
+    physics: false,
     interaction: { hover: true, dragView: true, zoomView: true },
   });
-  requestAnimationFrame(pulseTick);
+  net.fit({ animation: false });
+  requestAnimationFrame(travelTick);
 }
 
 function addClueNode(clue) {
   if (!gnodes) return;
   const nid = "n" + clue.cid;
   clue.nodeId = nid;
-  gnodes.add({ id: nid, label: shorten(clue.text, 38), title: clue.text,
-    shape: "dot", size: 16, font: { size: 11, face: "Inter" } });
+  gnodes.add({ id: nid, label: shorten(clue.text, 34), title: clue.text,
+    x: pinkyPos.x, y: pinkyPos.y, physics: false,
+    shape: "dot", size: 15, font: { size: 11, face: "Inter" } });
   gedges.add({ id: "e" + clue.cid, from: PINKY, to: nid,
-    font: { size: 9, face: "JetBrains Mono" },
-    arrows: { to: { enabled: true, scaleFactor: 0.5 } }, smooth: { type: "continuous" } });
+    smooth: { type: "continuous" }, physics: false,
+    arrows: { to: { enabled: true, scaleFactor: 0.45 } } });
   styleClueNode(clue);
+}
+
+/* Point at parameter t (0..1) along the route polyline. */
+function pointAlong(pts, t) {
+  const segs = [];
+  let total = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const d = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+    segs.push(d); total += d;
+  }
+  let dist = Math.max(0, Math.min(1, t)) * total;
+  for (let i = 0; i < segs.length; i++) {
+    if (dist <= segs[i] || i === segs.length - 1) {
+      const f = segs[i] ? dist / segs[i] : 0;
+      return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * f,
+               y: pts[i].y + (pts[i + 1].y - pts[i].y) * f };
+    }
+    dist -= segs[i];
+  }
+  return { ...pts[pts.length - 1] };
 }
 
 function styleClueNode(clue) {
@@ -158,18 +210,43 @@ function styleClueNode(clue) {
   else pulseSet.delete(clue.nodeId);
 }
 
-function pulseTick() {
-  if (gnodes && pulseSet.size) {
+/* Pinky + her clue cluster glide along the gray route. Progress advances toward
+   the gym as clues are confirmed true (each confirmed clue walks her closer). */
+function travelTick() {
+  if (gnodes && net) {
     const now = performance.now();
-    const phase = (Math.sin(now / 180) + 1) / 2;
-    const updates = [];
-    for (const id of pulseSet) {
-      updates.push({ id, borderWidth: 2 + phase * 2,
-        shadow: { enabled: true, color: "rgba(245,158,11,0.7)", size: 10 + phase * 18 } });
+    const trueCount = clues.filter((c) => c.verdict === "true").length;
+    const target = Math.min(1, trueCount / Math.max(1, ROUTE.length - 1));
+    routeProgress += (target - routeProgress) * 0.04; // ease toward target
+
+    const onRoute = pointAlong(ROUTE_PTS, routeProgress);
+    const bob = Math.sin(now / 600) * 6;
+    pinkyPos.x += (onRoute.x - pinkyPos.x) * 0.06;
+    pinkyPos.y += (onRoute.y - 55 + bob - pinkyPos.y) * 0.06;
+    net.moveNode(PINKY, pinkyPos.x, pinkyPos.y);
+
+    // Her clue nodes orbit her and travel with her.
+    const withNode = clues.filter((c) => c.nodeId);
+    const n = withNode.length;
+    const spin = now / 3200;
+    withNode.forEach((c, i) => {
+      const ang = (i / Math.max(1, n)) * Math.PI * 2 + spin;
+      const r = 62 + (i % 2) * 16;
+      net.moveNode(c.nodeId, pinkyPos.x + Math.cos(ang) * r, pinkyPos.y + Math.sin(ang) * r);
+    });
+
+    // amber pulse for unverified clue nodes
+    if (pulseSet.size) {
+      const phase = (Math.sin(now / 180) + 1) / 2;
+      const updates = [];
+      for (const id of pulseSet) {
+        updates.push({ id, borderWidth: 2 + phase * 2,
+          shadow: { enabled: true, color: "rgba(245,158,11,0.7)", size: 10 + phase * 18 } });
+      }
+      gnodes.update(updates);
     }
-    gnodes.update(updates);
   }
-  requestAnimationFrame(pulseTick);
+  requestAnimationFrame(travelTick);
 }
 
 /* ====================== INVESTIGATION ====================== */
@@ -253,6 +330,7 @@ async function loadSeed() {
   btn.disabled = true;
   btn.textContent = "Lighting up the map…";
   for (const c of SEED_CLUES) { await addClue(c.text, c.node_set); }
+  if (net) net.fit({ animation: { duration: 600 } });
   btn.disabled = false;
   btn.textContent = "Load the case clue pack ↩";
 }

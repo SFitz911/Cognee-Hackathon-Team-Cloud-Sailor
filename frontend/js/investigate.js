@@ -1,11 +1,6 @@
-/* Page 2 — investigation. Clues -> Cognee memory, the wolfpack, and a live
-   "discovery map": connections start dim and light up (pulsing green, then
-   steady) as the matching clue lands. False leads light up red. */
-
-/* Security gate: only reachable after facial recognition grants access. */
-if (sessionStorage.getItem("wolfpack_access") !== "granted") {
-  window.location.replace("/security.html");
-}
+/* Page 2 — investigation (Pinky + the wolfpack). Clues -> Cognee memory, the
+   four personas, and a live "discovery map": connections start dim and light up
+   (pulsing green, then steady) as the matching clue lands. False leads light red. */
 
 const PERSONA_META = {
   planner:  { emoji: "🧭", arche: "the planner" },

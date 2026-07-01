@@ -16,8 +16,8 @@ cognee_data/
 media/clips/*
 media/posters/*
 !media/**/.gitkeep
-# The founder talking-loop video IS committed so the cameo works on the cloud deploy.
-!media/clips/founder_talk.mp4
+# The founder talking-video pool IS committed so the cameo works on the cloud deploy.
+!media/clips/founder_talk_*.mp4
 # Chow cameo audio IS committed so the cameo works on the cloud deploy.
 !media/audio/chow_*.mp3
 !media/audio/chow_manifest.json

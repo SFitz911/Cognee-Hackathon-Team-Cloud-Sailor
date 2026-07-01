@@ -1,77 +1,41 @@
 """
-Generate a short 'founder talking' video from Founder.png via the
-Omni-Video-Factory image-to-video Space. Not lip-synced — it's a generative
-talking/gesturing loop we play (muted) while the accented audio plays over it.
+Pre-generate a pool of 'founder talking' videos so the cameo never waits.
 
-  python scripts/gen_founder_video.py
+  python scripts/gen_founder_video.py            # generate 8 (default)
+  python scripts/gen_founder_video.py 5          # generate N
 
-Output: media/clips/founder_talk.mp4
+Videos go to media/clips/founder_talk_XX.mp4 (committed). At runtime, the
+/cameo/videos/generate endpoint grows the pool further in the background.
 """
 
 from __future__ import annotations
 
-import shutil
 import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
-IMG = _ROOT / "media" / "images" / "Founder.png"
-OUT = _ROOT / "media" / "clips" / "founder_talk.mp4"
-SPACE = "FrameAI4687/Omni-Video-Factory"
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-PROMPT = (
-    "A charismatic man talking energetically straight to the camera, mouth moving as he "
-    "speaks, lively facial expressions, expressive hand gestures, subtle head movement, "
-    "moody nightclub neon lighting, cinematic."
-)
-
-
-def _first_video(result):
-    def one(x):
-        if isinstance(x, str):
-            return x
-        if isinstance(x, dict):
-            return x.get("video") or x.get("path") or x.get("url") or x.get("name")
-        return None
-    if isinstance(result, (list, tuple)):
-        for it in result:
-            p = one(it)
-            if p and str(p).lower().endswith((".mp4", ".webm", ".mov")):
-                return p
-        for it in result:
-            p = one(it)
-            if p:
-                return p
-    return one(result)
+from backend import video_gen  # noqa: E402
 
 
 def main() -> int:
-    if not IMG.exists():
-        print(f"Missing {IMG}")
-        return 1
-    from gradio_client import Client, handle_file
-
-    print(f"Connecting to {SPACE} …")
-    c = Client(SPACE, verbose=False)
-    print("Generating founder talking video (image-to-video)… this can take a few minutes.")
-    result = c.predict(
-        1,              # scene_count (int choice)
-        5,              # seconds_per_scene (int choice [3,5])
-        384,            # resolution (int choice [384,512])
-        handle_file(str(IMG)),  # image_file
-        PROMPT,         # base_prompt
-        PROMPT,         # s1
-        "", "", "",     # s2, s3, s4
-        api_name="/_submit_i2v_manual",
-    )
-    path = _first_video(result)
-    if path and Path(path).exists():
-        OUT.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(path, OUT)
-        print(f"✓ Saved -> {OUT} ({OUT.stat().st_size // 1024} KB)")
-        return 0
-    print(f"No video in result: {str(result)[:200]}")
-    return 1
+    n = int(sys.argv[1]) if len(sys.argv) > 1 else 8
+    print(f"Generating {n} founder talking videos via {video_gen.SPACE} …")
+    made = 0
+    for i in range(n):
+        try:
+            out = video_gen.generate_one(video_gen.PROMPTS[i % len(video_gen.PROMPTS)])
+            if out:
+                made += 1
+                print(f"  [{made}/{n}] -> {out.name} ({out.stat().st_size // 1024} KB)")
+            else:
+                print(f"  [{i+1}] no video returned")
+        except Exception as e:  # noqa: BLE001
+            print(f"  [{i+1}] failed: {str(e)[:120]}")
+    print(f"\n✓ {made} videos in {video_gen.CLIPS}")
+    return 0 if made else 1
 
 
 if __name__ == "__main__":

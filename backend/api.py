@@ -165,6 +165,21 @@ def cameo_lines(kind: str = "any", n: int = 1, max_len: int = 72) -> dict:
     return {"kind": kind, "lines": pool[:n]}
 
 
+@app.get("/cameo/videos")
+def cameo_videos() -> dict:
+    """List available founder talking videos (the cameo picks one at random)."""
+    from . import video_gen
+    return {"videos": video_gen.list_videos()}
+
+
+@app.post("/cameo/videos/generate")
+def cameo_videos_generate() -> dict:
+    """Kick off ONE background generation to grow the pool (latency-hiding)."""
+    from . import video_gen
+    started = video_gen.generate_async()
+    return {"started": started, "count": len(video_gen.list_videos())}
+
+
 @app.get("/cognee/datasets")
 def cognee_datasets() -> dict:
     """List the datasets (memory graphs) on the tenant, for the graph explorer."""

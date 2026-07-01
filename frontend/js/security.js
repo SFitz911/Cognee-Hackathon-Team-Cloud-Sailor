@@ -35,23 +35,47 @@ function checkCode() {
 /* Founder chat — plays a real lip-synced clip (baked audio, lips match the voice),
    exactly like the founder cameo on the last page. Talks once, then stops. */
 let sayClips = null;
-async function chowSays() {
-  const line = $("#fc-line"), vid = $("#fc-vid");
+
+async function loadSayClips() {
   if (!sayClips) {
     try { sayClips = await fetch("/media/clips/founder_say_manifest.json").then((r) => r.json()); }
     catch { sayClips = []; }
+    fillChowPicker();
   }
-  if (!sayClips.length) return;                       // nothing to play
-  const c = sayClips[Math.floor(Math.random() * sayClips.length)];
-  line.textContent = "“" + c.text + "”";
+  return sayClips;
+}
+
+function fillChowPicker() {
+  const sel = $("#fc-select");
+  if (!sel || !sayClips || sel.dataset.filled) return;
+  sayClips.forEach((c, i) => {
+    const o = document.createElement("option");
+    o.value = String(i);
+    o.textContent = c.text.length > 46 ? c.text.slice(0, 44) + "…" : c.text;
+    sel.appendChild(o);
+  });
+  sel.dataset.filled = "1";
+}
+
+/* Play a specific clip (baked audio, unmuted, plays once). */
+function playChow(clip) {
+  const line = $("#fc-line"), vid = $("#fc-vid");
+  if (!clip) return;
+  line.textContent = "“" + clip.text + "”";
   try {
     vid.loop = false;
     vid.muted = false;                                // baked audio matches the lips
-    vid.src = c.file;
+    vid.src = clip.file;
     vid.currentTime = 0;
     vid.onended = () => { try { vid.pause(); } catch {} };
     vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
   } catch {}
+}
+
+async function chowSays() {
+  const clips = await loadSayClips();
+  if (!clips.length) return;
+  playChow(clips[Math.floor(Math.random() * clips.length)]);
 }
 
 async function refreshAuthStatus() {
@@ -213,6 +237,11 @@ $("#scan").addEventListener("click", scanToEnter);
 $("#code-check").addEventListener("click", checkCode);
 $("#code-input").addEventListener("keydown", (e) => { if (e.key === "Enter") checkCode(); });
 $("#fc-say").addEventListener("click", chowSays);
+$("#fc-select").addEventListener("change", (e) => {
+  const i = e.target.value;
+  if (i !== "" && sayClips) playChow(sayClips[Number(i)]);
+});
+loadSayClips();   // populate the re-watch dropdown up front
 
 $("#enter-gym").classList.add("hidden");
 updateGate();

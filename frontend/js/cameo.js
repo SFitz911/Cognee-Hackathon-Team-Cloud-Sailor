@@ -81,6 +81,10 @@ function buildCameoOverlay() {
       <div class="cameo-name">THE FOUNDER OF <b>COGNEE</b> · CHOW MODE</div>
       <div class="cameo-subtitle" id="cameo-sub">…</div>
       <button class="cameo-another" id="cameo-another" type="button">🎲 Another one!</button>
+      <label class="cameo-pick">
+        <span>▶ re-watch a line</span>
+        <select id="cameo-select"><option value="">— pick a Chow line —</option></select>
+      </label>
     </div>`;
   return wrap;
 }
@@ -177,6 +181,24 @@ async function openCameo(kind = "intro") {
     };
     // Play 2 distinct random clips so it's never "the same loop".
     another.addEventListener("click", () => { try { loopVid.pause(); } catch {} playSeq([pickSayFrom(say)]); });
+
+    // Re-watch dropdown: pick any specific line to replay.
+    const sel = overlay.querySelector("#cameo-select");
+    if (sel) {
+      say.forEach((c, i) => {
+        const o = document.createElement("option");
+        o.value = String(i);
+        o.textContent = c.text.length > 46 ? c.text.slice(0, 44) + "…" : c.text;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", (e) => {
+        const i = e.target.value;
+        if (i === "") return;
+        try { loopVid.pause(); } catch {}
+        playSeq([say[Number(i)]]);
+      });
+    }
+
     playSeq(shuffled(say).slice(0, 2));
     return;
   }

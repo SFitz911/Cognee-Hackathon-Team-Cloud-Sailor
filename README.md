@@ -6,12 +6,18 @@
 
 ### 👉 **https://wolfpack-recall.onrender.com**
 
-**Judges: it's deployed and fully playable in your browser.** Walk the 5-page story
-end to end — investigate the case, watch the founder talk (real lip-synced video),
-crack the code, scan your face, win the dog show, and explore the **live Cognee
-knowledge graph**. There's even a free **"Ask about Cognee"** chatbot on the last page.
+📱 **Works great on your iPhone / Android too — give it a try!** *(The mobile experience
+is in **beta**, so a few things may look slightly off on small screens — but the full
+5-page story is playable end to end on a phone.)*
 
-*(Face ID uses your webcam and only works over HTTPS — the Render URL qualifies. If a
+**Judges: it's deployed and fully playable in your browser.** Walk the 5-page story
+end to end — hit **🕵️ Auto Detective** to solve the case in one click (or investigate
+manually), watch the founder talk (real lip-synced video), crack the code, scan your
+face, win the dog show, and explore the **live Cognee knowledge graph**. There's a
+free, no-login **"Ask about Cognee"** guide on the last page (with an optional one-tap
+free-AI upgrade).
+
+*(Face ID uses your camera and only works over HTTPS — the Render URL qualifies. If a
 public HF Space is briefly rate-limited, the app degrades gracefully; nothing blocks.)*
 
 ---
@@ -38,7 +44,7 @@ a real Cognee knowledge graph — and the app *shows you that graph*.
 | **2 · Investigation** | Add clues → they're `remember()`-ed into Cognee. Ask **4 AI personalities** who reason over Cognee's `GRAPH_COMPLETION`. Mark clues ✓/✗ or **🔍 fact-check against memory** (green/red). Pinky walks a storyline route as clues are confirmed. | `remember` · `recall` · `GRAPH_COMPLETION` · fact-check vs memory · node_sets |
 | **3 · Access** | Reunion video (Pinky reveals the belly code **8675309**) + **Founder chat (Chow mode)** → enter the code → **facial-recognition scan** (DeepFace). Unlocks on code **and** face. | DeepFace face recognition · accented TTS |
 | **4 · Success** | "You're in" → the **dog-show winning video** plays | AI video |
-| **5 · Cognee** | The **live, real Cognee knowledge graph** (Cognee's own UI, embedded), toggle vs our storyline map, switch datasets. **"Ask about Cognee"** help chatbot. | Cognee `visualize` graph · datasets · **free Puter.js chat** |
+| **5 · Cognee** | The **live, real Cognee knowledge graph** (Cognee's own UI, embedded), toggle vs our storyline map, switch datasets. Free **no-login "Ask about Cognee"** guide (+ optional one-tap free-AI upgrade). | Cognee `visualize` graph · datasets · built-in guide + **free Puter.js AI** |
 
 ---
 

@@ -599,12 +599,17 @@ iframe.explorer-graph { background: #fff; }
 .explorer-exit { display: none; }
 
 @media (max-width: 760px) {
+  /* let the page breathe: scroll vertically instead of cramming everything
+     into one locked viewport where the bars overlap the graph */
+  .explorer { height: auto; min-height: 100dvh; overflow-y: auto; }
   /* one scrollable row of controls instead of a cluttered wrap */
   .explorer-bar { flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 8px 12px; -webkit-overflow-scrolling: touch; }
   .explorer-bar .gtab { flex: 0 0 auto; font-size: 11px; padding: 6px 11px; }
   .ds-picker { flex: 0 0 auto; }
   .ds-picker select { min-width: 118px; }
   .explorer-hint { display: none; }
+  /* graph gets its own tall, dedicated block so it never collapses or overlaps */
+  .explorer-stage { flex: none; height: 72vh; min-height: 440px; }
   /* keep the header compact and its Back button tappable */
   .explorer .topbar { flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
   .explorer .case-banner { display: none; }

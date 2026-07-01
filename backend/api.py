@@ -58,6 +58,17 @@ async def _no_cache_code(request, call_next):
     return response
 
 
+@app.on_event("startup")
+def _warm_face_model() -> None:
+    """Preload the DeepFace model in a background thread so the first face scan
+    isn't slowed by loading the model into RAM. Non-blocking; boot stays fast."""
+    import threading
+
+    from . import face_gate
+
+    threading.Thread(target=face_gate.warm_up, daemon=True).start()
+
+
 # -- lazy singletons ---------------------------------------------------------
 @lru_cache(maxsize=1)
 def get_cognee() -> CogneeClient:
@@ -275,7 +286,11 @@ def memory_search(q: str, top_k: int = 5) -> dict:
 @app.get("/auth/status")
 def auth_status() -> dict:
     from . import face_gate
-    return {"available": face_gate.is_available(), "enrolled": face_gate.enrolled_names()}
+    return {
+        "available": face_gate.is_available(),
+        "enrolled": face_gate.enrolled_names(),
+        "warm": face_gate.is_warm(),
+    }
 
 
 @app.post("/auth/enroll")

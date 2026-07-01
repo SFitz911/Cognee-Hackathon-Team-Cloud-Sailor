@@ -83,8 +83,12 @@ async function refreshAuthStatus() {
   const text = $("#status-text");
   try {
     const s = await api("/auth/status");
-    dot.className = "dot " + (s.available ? "ok" : "bad");
-    text.textContent = s.available ? "scanner online" : "scanner loading… (DeepFace)";
+    dot.className = "dot " + (s.available ? (s.warm ? "ok" : "bad") : "bad");
+    text.textContent = !s.available
+      ? "scanner loading… (DeepFace)"
+      : s.warm
+        ? "scanner ready — fast scans"
+        : "warming up the model… (first scan may be slow)";
     $("#enrolled-info").textContent = s.enrolled?.length
       ? `enrolled: ${s.enrolled.join(", ")}`
       : "enrolled: none yet — enroll a face first";

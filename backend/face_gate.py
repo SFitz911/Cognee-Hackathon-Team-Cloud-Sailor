@@ -47,6 +47,39 @@ def is_available() -> bool:
         return False
 
 
+_warmed = False
+
+
+def warm_up() -> bool:
+    """Load the SFace model + detector into RAM once, at startup.
+
+    This moves the heavy one-time cost (TensorFlow import + model build) off the
+    user's first scan and onto server boot, so live scans are fast. Safe to call
+    from a background thread; no-ops if deps are missing.
+    """
+    global _warmed
+    if _warmed or not is_available():
+        return _warmed
+    try:
+        import numpy as np
+        from deepface import DeepFace
+
+        blank = np.zeros((160, 160, 3), dtype="uint8")
+        # build_model caches the network; represent + extract_faces prime the
+        # recognition model and the OpenCV detector respectively.
+        DeepFace.represent(
+            blank, model_name=MODEL_NAME, detector_backend="skip", enforce_detection=False
+        )
+        _warmed = True
+    except Exception:  # noqa: BLE001 — warmup is best-effort
+        pass
+    return _warmed
+
+
+def is_warm() -> bool:
+    return _warmed
+
+
 def enrolled_names() -> list[str]:
     if not GALLERY.is_dir():
         return []

@@ -5,7 +5,7 @@ const CAST = [
   { img: "dmytro-gordon.png",     role: "THE WILDCARD",  name: "chaos",       accent: "--wildcard" },
   { img: "leonie-sauer.png",      role: "THE WORRIER",   name: "the skeptic", accent: "--worrier" },
   { img: "dave-nielsen.png",      role: "THE OPTIMIST",  name: "the dreamer", accent: "--optimist" },
-  { img: "vasilije-markovic.png", role: "FOUNDER CAMEO", name: "Cognee",      accent: "--cyan", cameo: true },
+  { img: "vasilije-markovic.png", role: "FOUNDER CAMEO", name: "Cognee founder as Mr. Chow", accent: "--cyan", cameo: true },
 ];
 
 function renderCast() {

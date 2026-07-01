@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
   <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <!-- Puter.js: free, keyless, client-side AI (user-pays model) for the help chat -->
+  <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -73,6 +75,27 @@
           <li>🔌 <b>MCP + integrations</b> — one memory, many agents</li>
         </ul>
         <button id="about-explore" class="btn btn-cta" type="button">Explore the graph →</button>
+      </div>
+    </div>
+
+    <!-- Ask-about-Cognee help assistant (bottom dock) -->
+    <div id="ask-dock" class="ask-dock">
+      <button id="ask-toggle" class="ask-launch" type="button">💬 Ask about Cognee</button>
+      <div class="ask-panel hidden" id="ask-panel">
+        <div class="ask-head">
+          <span>🧠 <b>Cognee Guide</b> — learn anything, or get unstuck</span>
+          <button id="ask-min" class="ask-min" type="button" aria-label="Minimize">–</button>
+        </div>
+        <div class="ask-msgs" id="ask-msgs"></div>
+        <div class="ask-chips" id="ask-chips">
+          <button type="button" data-q="What is Cognee and how does it work?">What is Cognee?</button>
+          <button type="button" data-q="How do I add a clue and ask the Wolfpack on the investigation page?">How do I investigate?</button>
+          <button type="button" data-q="I'm stuck on the access page — where's the code and how do I get in?">I'm stuck</button>
+        </div>
+        <form class="ask-form" id="ask-form">
+          <input id="ask-input" placeholder="Learn anything about Cognee…" autocomplete="off" />
+          <button class="btn btn-primary" type="submit">Send</button>
+        </form>
       </div>
     </div>
   </section>

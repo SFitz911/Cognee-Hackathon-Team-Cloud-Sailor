@@ -73,6 +73,10 @@ class ValidateIn(BaseModel):
     text: str = Field(..., min_length=1, description="A clue/statement to fact-check against memory")
 
 
+class AskIn(BaseModel):
+    question: str = Field(..., min_length=1, description="A question about Cognee or how to use the app")
+
+
 class FaceEnrollIn(BaseModel):
     name: str = Field("operative", description="Operative name to store the face under")
     image: str = Field(..., min_length=1, description="Webcam frame as a data URL / base64")
@@ -163,6 +167,16 @@ def cameo_lines(kind: str = "any", n: int = 1, max_len: int = 72) -> dict:
     random.shuffle(pool)
     n = max(1, min(n, 5))
     return {"kind": kind, "lines": pool[:n]}
+
+
+@app.post("/cognee/ask")
+def cognee_ask(req: AskIn) -> dict:
+    """Cognee help assistant — explains Cognee and helps users who are stuck."""
+    try:
+        pack = get_wolfpack()
+    except CogneeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+    return {"answer": pack.ask_guide(req.question)}
 
 
 @app.get("/cameo/videos")

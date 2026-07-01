@@ -113,6 +113,98 @@ document.getElementById("about-explore").addEventListener("click", () => showAbo
 aboutOverlay.addEventListener("click", (e) => { if (e.target === aboutOverlay) showAbout(false); });
 showAbout(true);
 
+/* ---- Ask-about-Cognee help assistant ---- */
+const askPanel = document.getElementById("ask-panel");
+const askMsgs = document.getElementById("ask-msgs");
+let askGreeted = false;
+
+function askBubble(text, who) {
+  const b = document.createElement("div");
+  b.className = "ask-bubble " + who;
+  b.textContent = text;
+  askMsgs.appendChild(b);
+  askMsgs.scrollTop = askMsgs.scrollHeight;
+  return b;
+}
+function openAsk(open) {
+  askPanel.classList.toggle("hidden", !open);
+  document.getElementById("ask-toggle").classList.toggle("hidden", open);
+  if (open && !askGreeted) {
+    askGreeted = true;
+    askBubble("Hi! I'm the Cognee Guide. Ask me anything about Cognee, or tell me where you're stuck and I'll walk you through it.", "bot");
+  }
+}
+/* The chat uses Puter.js — free, keyless, client-side AI (Puter's user-pays
+   model), so it works for ANY visitor at no cost to the app owner. If Puter is
+   unavailable, it falls back to a built-in help answer. */
+const GUIDE = [
+  "You are the Cognee Guide — a friendly, concise help assistant in the 'Hangover 4: Berlin /",
+  "Wolfpack Recall' hackathon app. Help users (1) understand Cognee and (2) get unstuck in the app.",
+  "Keep answers SHORT (2-5 sentences), warm, practical; use a concrete example when useful.",
+  "",
+  "COGNEE: an open-source AI memory layer for agents. Core API: remember() (ingest+cognify text",
+  "into a knowledge graph), recall() (query via GRAPH_COMPLETION + other modes), improve(), forget().",
+  "It builds a HYBRID vector + knowledge graph, grounds entities into an ontology, supports datasets",
+  "and node_sets, runs on Cognee Cloud or self-hosted, and connects to agents via MCP. Beats plain RAG.",
+  "",
+  "THIS APP (5 pages): (1) Intro. (2) Investigation — add clues (each is remembered into Cognee),",
+  "click 'Ask the Wolfpack' so 4 AI personalities reason over Cognee's GRAPH_COMPLETION, and mark",
+  "clues true/false or '🔍 check' to fact-check against memory (green=true, red=false); Pinky walks",
+  "the storyline route as clues are confirmed. (3) Access — the reunion video shows the belly code",
+  "(8675309); type it in and scan your face; ENTER unlocks when both pass. (4) Success — the dog-show",
+  "win. (5) This page — the LIVE Cognee graph (toggle 'Cognee Brain' vs 'Storyline map', switch",
+  "datasets like pinky_serbia or mr_chow). If they're stuck, give step-by-step help for their task.",
+].join("\n");
+
+const FAQ = [
+  [/what.*cognee|about cognee|explain cognee/i, "Cognee is an open-source AI memory layer for agents. You remember() text into a hybrid vector + knowledge graph, then recall() connected facts (its GRAPH_COMPLETION fuses everything into one grounded answer). It grounds entities into an ontology, supports datasets/node_sets, runs on Cognee Cloud or self-hosted, and plugs into agents via MCP — beating plain RAG on long-context memory."],
+  [/investigat|add.*clue|ask.*wolfpack|page 2/i, "On the Investigation page: type a clue and hit '+ Remember' (it's stored in Cognee) — it appears as a node under Pinky. Click 'ASK THE WOLFPACK' so the 4 AI minds reason over Cognee's memory. Mark each clue ✓/✗, or '🔍 check' to fact-check it against memory (green=true, red=false). Confirming true clues walks Pinky toward the gym."],
+  [/stuck|code|access|8675309|scan|face|page 3|get in/i, "On the Access page: watch the reunion video — Pinky stands up and her belly shows the code 8675309. Type 8675309 into the code box and hit Unlock, then Start camera → Enroll my face → Scan. When both the code and face check out, the 'ENTER THE GYM' button appears."],
+  [/graph|brain|schema|dataset|page 5|memory graph/i, "This page shows Cognee's real knowledge graph. Use 'Cognee Brain' for the live Cognee UI or 'Storyline map' for our narrative view, and switch the dataset (e.g. pinky_serbia or mr_chow) to explore different memories. It's the actual memory Cognee built from your clues — not a mockup."],
+  [/how.*win|dog show|page 4|success/i, "After you get into the gym (code + face), you reach the Success page and the dog-show win video plays automatically — Pinky takes Best in Show. Then click through to see the Cognee memory graph."],
+];
+function faqAnswer(q) {
+  for (const [re, a] of FAQ) if (re.test(q)) return a;
+  return "I'm the Cognee Guide! Cognee is an open-source AI memory layer — remember() stores text into a knowledge graph, recall() answers over it. Try: “What is Cognee?”, “How do I investigate?”, or tell me exactly where you're stuck.";
+}
+function extractPuter(r) {
+  if (!r) return "";
+  if (typeof r === "string") return r;
+  if (r.message) { const c = r.message.content; if (typeof c === "string") return c; if (Array.isArray(c)) return c.map((x) => x.text || "").join(""); }
+  return r.text || String(r);
+}
+async function askSend(question) {
+  if (!question.trim()) return;
+  askBubble(question, "me");
+  const thinking = askBubble("…", "bot");
+  try {
+    if (window.puter && puter.ai && puter.ai.chat) {
+      const resp = await puter.ai.chat(
+        [{ role: "system", content: GUIDE }, { role: "user", content: question }],
+        { model: "gpt-4o-mini" }
+      );
+      thinking.textContent = extractPuter(resp).trim() || faqAnswer(question);
+    } else {
+      thinking.textContent = faqAnswer(question);
+    }
+  } catch (e) {
+    thinking.textContent = faqAnswer(question);
+  }
+}
+
+document.getElementById("ask-toggle").addEventListener("click", () => openAsk(true));
+document.getElementById("ask-min").addEventListener("click", () => openAsk(false));
+document.getElementById("ask-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = document.getElementById("ask-input");
+  askSend(input.value);
+  input.value = "";
+});
+document.getElementById("ask-chips").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-q]");
+  if (btn) askSend(btn.dataset.q);
+});
+
 loadDatasets();
 showView("brain");   // default to Cognee Brain first
 refreshStatus();

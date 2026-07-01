@@ -435,6 +435,18 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
   color: #150a10; background: linear-gradient(135deg, var(--magenta), var(--rust));
   border-color: transparent; box-shadow: 0 4px 16px rgba(255,61,139,0.3);
 }
+
+/* Colour-coded action buttons on the graph explorer, each with a thin glowing border */
+.gtab-green { border-color: #34d399; color: #a7f3d0; box-shadow: 0 0 10px rgba(52,211,153,0.45); }
+.gtab-green:hover { border-color: #34d399; color: #d1fae5; box-shadow: 0 0 16px rgba(52,211,153,0.75); }
+.gtab-pink { border-color: var(--magenta); color: #ffb3d1; box-shadow: 0 0 10px rgba(255,61,139,0.45); }
+.gtab-pink:hover { border-color: var(--magenta); color: #ffd1e4; box-shadow: 0 0 16px rgba(255,61,139,0.75); }
+.gtab-blue { border-color: #38bdf8; color: #bae6fd; animation: founderGlow 2.2s ease-in-out infinite; }
+.gtab-blue:hover { border-color: #38bdf8; color: #e0f2fe; box-shadow: 0 0 18px rgba(56,189,248,0.85); }
+@keyframes founderGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(56,189,248,0.4); }
+  50%      { box-shadow: 0 0 18px rgba(56,189,248,0.9); }
+}
 .graph-legend {
   display: flex; gap: 18px; justify-content: center; margin: 0 0 12px;
   font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-faint);

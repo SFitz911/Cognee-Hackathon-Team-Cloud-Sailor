@@ -96,6 +96,12 @@ function openCameo(kind = "intro") {
 
   // Prefer a generated MP4 if it exists; otherwise animated portrait + TTS.
   let usedVideo = false;
+  let narrated = false;
+  const narrate = () => {
+    if (narrated || usedVideo) return;
+    narrated = true;
+    speakLines(lines, sub, () => setTimeout(close, 1200));
+  };
   video.src = CAMEO.clip;
   video.onloadeddata = () => {
     usedVideo = true;
@@ -105,12 +111,9 @@ function openCameo(kind = "intro") {
     video.play().catch(() => {});
     video.onended = close;
   };
-  video.onerror = () => {
-    if (usedVideo) return;
-    speakLines(lines, sub, () => setTimeout(close, 1200));
-  };
-  // Safety: if the video never loads/fires within 1.2s, go to TTS.
-  setTimeout(() => { if (!usedVideo) { video.onerror = null; speakLines(lines, sub, () => setTimeout(close, 1200)); } }, 1200);
+  video.onerror = narrate;
+  // Safety: if the video never loads within 1.2s, narrate with browser speech.
+  setTimeout(narrate, 1200);
 }
 
 // warm up voices (some browsers load them async)

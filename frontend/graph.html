@@ -14,6 +14,7 @@
   <div class="grain" aria-hidden="true"></div>
 
   <section class="view explorer">
+    <!-- Clean header: nav + brand + status only -->
     <header class="topbar">
       <a href="/" class="btn btn-back">← poster</a>
       <a href="/investigate.html" class="btn btn-back">🔎 Investigation</a>
@@ -21,30 +22,29 @@
         <span class="brand-mark">GRAPH</span>
         <span class="brand-sub">EXPLORER</span>
       </div>
-
-      <div class="explorer-controls">
-        <div class="graph-toggle">
-          <button id="tab-map" class="gtab active" type="button">🗺️ Storyline map</button>
-          <button id="tab-brain" class="gtab" type="button">🧠 Cognee Brain</button>
-        </div>
-        <label class="ds-picker" id="ds-wrap" hidden>
-          <span>dataset</span>
-          <select id="ds-select"></select>
-        </label>
-      </div>
-
       <div class="status" id="status">
         <span class="dot" id="status-dot"></span>
         <span id="status-text">connecting…</span>
       </div>
     </header>
 
-    <div class="explorer-stage">
-      <div id="graph" class="explorer-graph"></div>
-      <iframe id="brain-frame" class="explorer-graph hidden" title="Cognee knowledge graph" loading="lazy"></iframe>
-      <div class="explorer-hint" id="explorer-hint">
-        🗺️ Storyline map — our narrative. Flip to 🧠 Cognee Brain to see Cognee's real graph (their UI), and pick any dataset.
+    <!-- Control bar (its own row, below the header) -->
+    <div class="explorer-bar">
+      <div class="graph-toggle">
+        <button id="tab-brain" class="gtab active" type="button">🧠 Cognee Brain</button>
+        <button id="tab-map" class="gtab" type="button">🗺️ Storyline map</button>
       </div>
+      <label class="ds-picker" id="ds-wrap">
+        <span>dataset</span>
+        <select id="ds-select"></select>
+      </label>
+      <span class="explorer-hint" id="explorer-hint"></span>
+    </div>
+
+    <!-- Full-bleed graph area -->
+    <div class="explorer-stage">
+      <iframe id="brain-frame" class="explorer-graph" title="Cognee knowledge graph" loading="lazy"></iframe>
+      <div id="graph" class="explorer-graph hidden"></div>
     </div>
   </section>
 

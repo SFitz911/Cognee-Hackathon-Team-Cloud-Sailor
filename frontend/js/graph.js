@@ -86,6 +86,7 @@ function loadBrain(force) {
 }
 
 /* ---- view toggle ---- */
+let storylineBuilt = false;
 function showView(which) {
   const brain = which === "brain";
   document.getElementById("tab-brain").classList.toggle("active", brain);
@@ -94,15 +95,16 @@ function showView(which) {
   document.getElementById("graph").classList.toggle("hidden", brain);
   document.getElementById("ds-wrap").hidden = !brain;
   document.getElementById("explorer-hint").textContent = brain
-    ? "🧠 Cognee Brain — the real knowledge graph in Cognee's own UI. Switch dataset to explore other memories."
-    : "🗺️ Storyline map — our narrative. Flip to 🧠 Cognee Brain to see Cognee's real graph (their UI).";
+    ? "Cognee's real knowledge graph, in Cognee's own UI. Switch dataset to explore other memories."
+    : "Our narrative map — the storyline route, Pinky, and every clue.";
   if (brain) loadBrain(false);
+  else if (!storylineBuilt) { buildStoryline(); storylineBuilt = true; }
 }
 
 document.getElementById("tab-map").addEventListener("click", () => showView("map"));
 document.getElementById("tab-brain").addEventListener("click", () => showView("brain"));
 
-buildStoryline();
 loadDatasets();
+showView("brain");   // default to Cognee Brain first
 refreshStatus();
 setInterval(refreshStatus, 15000);

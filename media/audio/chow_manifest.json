@@ -1,0 +1,102 @@
+[
+  {
+    "file": "/media/audio/chow_00.mp3",
+    "text": "Toodaloo, mother-truckers!",
+    "category": "Greeting"
+  },
+  {
+    "file": "/media/audio/chow_01.mp3",
+    "text": "Guess who's back? Back again? Chow's back. Tell a friend.",
+    "category": "Greeting"
+  },
+  {
+    "file": "/media/audio/chow_02.mp3",
+    "text": "Good morning, sunshine. I'm the sunshine. Deal with it.",
+    "category": "Greeting"
+  },
+  {
+    "file": "/media/audio/chow_03.mp3",
+    "text": "So long! Chow has left the building, baby!",
+    "category": "Greeting"
+  },
+  {
+    "file": "/media/audio/chow_04.mp3",
+    "text": "Sleep is a rumor spread by boring people.",
+    "category": "Party"
+  },
+  {
+    "file": "/media/audio/chow_05.mp3",
+    "text": "Bring a marble skateboard to the VIP section or don't bother.",
+    "category": "Party"
+  },
+  {
+    "file": "/media/audio/chow_06.mp3",
+    "text": "Meet me in Vegas. Dress sensational or go home.",
+    "category": "Party"
+  },
+  {
+    "file": "/media/audio/chow_07.mp3",
+    "text": "Meet me in the winner's circle. Dress dangerous or go home.",
+    "category": "Party"
+  },
+  {
+    "file": "/media/audio/chow_08.mp3",
+    "text": "I'd explain, but you're not legendary enough to understand.",
+    "category": "Brag"
+  },
+  {
+    "file": "/media/audio/chow_09.mp3",
+    "text": "Call me legendary, because I am, and you were about to.",
+    "category": "Brag"
+  },
+  {
+    "file": "/media/audio/chow_10.mp3",
+    "text": "If sensational were illegal, I'd be doing life. Worth it.",
+    "category": "Brag"
+  },
+  {
+    "file": "/media/audio/chow_11.mp3",
+    "text": "In a party you weren't invited to, they name drinks after me.",
+    "category": "Brag"
+  },
+  {
+    "file": "/media/audio/chow_12.mp3",
+    "text": "Doubt me and I'll be flawless about it in the winner's circle.",
+    "category": "Confidence"
+  },
+  {
+    "file": "/media/audio/chow_13.mp3",
+    "text": "Watch me turn your car into something magnificent.",
+    "category": "Confidence"
+  },
+  {
+    "file": "/media/audio/chow_14.mp3",
+    "text": "Watch me turn your car into something unstoppable.",
+    "category": "Confidence"
+  },
+  {
+    "file": "/media/audio/chow_15.mp3",
+    "text": "Gotta bounce. My reflection needs attention.",
+    "category": "Exit"
+  },
+  {
+    "file": "/media/audio/chow_16.mp3",
+    "text": "I'd stay, but I have to go be amazing somewhere else.",
+    "category": "Exit"
+  },
+  {
+    "file": "/media/audio/chow_17.mp3",
+    "text": "And that's how you leave a room. You're welcome.",
+    "category": "Exit"
+  },
+  {
+    "file": "/media/audio/chow_18.mp3",
+    "text": "I brought an angry swan into Vegas and called it a plan.",
+    "category": "Chaos"
+  },
+  {
+    "file": "/media/audio/chow_19.mp3",
+    "text": "I don't cause trouble. Trouble sees me and gets ambitious.",
+    "category": "Chaos"
+  }
+]

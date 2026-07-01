@@ -15,3 +15,7 @@ tf-keras
 
 # Poster generation via a free public Hugging Face Space (scripts/gen_poster_hf.py).
 gradio_client>=1.0
+
+# Founder cameo voice clips — accented TTS (scripts/gen_chow_audio.py).
+# Not needed at runtime on the cloud: the mp3s are pre-generated and committed.
+edge-tts>=7.0

@@ -654,13 +654,29 @@ iframe.explorer-graph { background: #fff; }
   position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1;
   background: #050409; border: 1px solid var(--line);
 }
-.cameo-face, .cameo-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cameo-face { width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: center 70%; }
 .cameo-face { animation: kenburns 9s ease-in-out infinite alternate; }
-.cameo-scan {
-  position: absolute; left: 0; right: 0; top: 0; height: 3px;
-  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-  box-shadow: 0 0 14px var(--cyan); animation: cameoScan 3.4s ease-in-out infinite;
+/* while a clip plays, the avatar actively "talks" */
+.cameo-stage.speaking .cameo-face { animation: chowTalk 0.42s ease-in-out infinite; }
+.cameo-ring {
+  position: absolute; inset: 0; border-radius: 12px; pointer-events: none;
+  box-shadow: inset 0 0 0 0 rgba(56,225,214,0); transition: box-shadow .2s;
 }
+.cameo-stage.speaking .cameo-ring {
+  box-shadow: inset 0 0 40px rgba(56,225,214,0.35), inset 0 0 0 2px rgba(56,225,214,0.6);
+  animation: chowGlow 0.7s ease-in-out infinite;
+}
+.cameo-bars {
+  position: absolute; left: 0; right: 0; bottom: 10px; display: flex; gap: 5px;
+  justify-content: center; align-items: flex-end; height: 26px; opacity: 0; transition: opacity .2s;
+}
+.cameo-stage.speaking .cameo-bars { opacity: 1; }
+.cameo-bars i { width: 5px; height: 8px; border-radius: 3px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.cameo-stage.speaking .cameo-bars i { animation: chowBar 0.6s ease-in-out infinite; }
+.cameo-bars i:nth-child(2) { animation-delay: .12s !important; }
+.cameo-bars i:nth-child(3) { animation-delay: .24s !important; }
+.cameo-bars i:nth-child(4) { animation-delay: .09s !important; }
+.cameo-bars i:nth-child(5) { animation-delay: .18s !important; }
 .cameo-name {
   text-align: center; margin-top: 14px; font-family: "Bebas Neue", sans-serif;
   letter-spacing: 3px; font-size: 18px; color: var(--ink-dim);
@@ -680,7 +696,9 @@ iframe.explorer-graph { background: #fff; }
 .cameo-another:disabled { opacity: 0.5; cursor: wait; }
 
 @keyframes kenburns { from { transform: scale(1) translateY(0); } to { transform: scale(1.08) translateY(-2%); } }
-@keyframes cameoScan { 0%,100% { top: 6%; } 50% { top: 92%; } }
+@keyframes chowTalk { 0%,100% { transform: scale(1.04) translateY(0) rotate(-0.4deg); } 50% { transform: scale(1.07) translateY(-1.5%) rotate(0.4deg); } }
+@keyframes chowGlow { 0%,100% { box-shadow: inset 0 0 30px rgba(56,225,214,0.25), inset 0 0 0 2px rgba(56,225,214,0.5); } 50% { box-shadow: inset 0 0 55px rgba(56,225,214,0.5), inset 0 0 0 3px rgba(56,225,214,0.85); } }
+@keyframes chowBar { 0%,100% { height: 7px; } 50% { height: 24px; } }
 
 /* sidebar on mobile: full width above the content, steps scroll horizontally */
 @media (max-width: 900px) {

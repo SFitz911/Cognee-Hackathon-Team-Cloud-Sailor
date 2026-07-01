@@ -14,9 +14,11 @@ cognee_data/
 # Large generated media — clips/audio are regenerated, not version-controlled.
 # (Stills in media/images, including the poster, ARE committed so the app works on clone.)
 media/clips/*
-media/audio/*
 media/posters/*
 !media/**/.gitkeep
+# Chow cameo audio IS committed so the cameo works on the cloud deploy.
+!media/audio/chow_*.mp3
+!media/audio/chow_manifest.json
 
 # Enrolled faces (PII) and DeepFace caches — never commit
 media/faces/

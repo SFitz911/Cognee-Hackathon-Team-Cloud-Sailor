@@ -20,7 +20,7 @@ services:
         value: claude-haiku-4-5
       # Per-IP rate limit for the Claude-backed endpoints (max requests / window secs).
       - key: WOLFPACK_RATE_MAX
-        value: "6"
+        value: "30"
       - key: WOLFPACK_RATE_WINDOW
         value: "600"
       # --- secrets: set these in the Render dashboard (not committed) ---

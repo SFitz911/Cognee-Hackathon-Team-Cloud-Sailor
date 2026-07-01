@@ -628,6 +628,15 @@ iframe.explorer-graph { background: #fff; }
 .ask-powered { text-align: center; padding: 4px 12px 10px; font-size: 10px; color: var(--ink-faint); font-family: "JetBrains Mono", monospace; }
 .ask-powered b { color: var(--cyan); }
 
+/* Back / Next page navigation (bottom of pages 1-4) */
+.page-nav { display: flex; align-items: center; gap: 12px; max-width: 900px; margin: 20px auto 46px; padding: 0 20px; }
+.page-nav .pn-spacer { flex: 1; }
+.pn-back, .pn-next { text-decoration: none; border-radius: 11px; padding: 12px 20px; font-weight: 700; font-size: 13.5px; font-family: "Inter", sans-serif; transition: transform .15s var(--ease), box-shadow .2s, background .2s; }
+.pn-back { background: #241d2e; color: var(--ink); border: 1px solid var(--line); }
+.pn-back:hover { background: #2e2539; transform: translateY(-1px); }
+.pn-next { background: linear-gradient(135deg, var(--magenta), var(--rust)); color: #150a10; box-shadow: 0 6px 20px rgba(255,61,139,0.25); }
+.pn-next:hover { box-shadow: 0 10px 28px rgba(255,61,139,0.45); transform: translateY(-1px); }
+
 /* ============================================================
    MOBILE / RESPONSIVE (phones, iPhone-friendly)
    ============================================================ */

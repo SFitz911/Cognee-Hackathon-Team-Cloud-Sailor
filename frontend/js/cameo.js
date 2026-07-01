@@ -130,7 +130,12 @@ async function openCameo(kind = "intro") {
   let stopMotion = null;
 
   const startSpeaking = () => { stage.classList.add("speaking"); if (analyser) analyser.resume(); if (!stopMotion) stopMotion = driveMotion(stage, analyser); };
-  const stopSpeaking = () => { stage.classList.remove("speaking"); if (stopMotion) { stopMotion(); stopMotion = null; } stage.style.setProperty("--talk", 0); };
+  const stopSpeaking = () => {
+    stage.classList.remove("speaking");
+    if (stopMotion) { stopMotion(); stopMotion = null; }
+    stage.style.setProperty("--talk", 0);
+    try { loopVid.loop = false; loopVid.pause(); } catch {}   // stop looping once he's done
+  };
   const close = () => {
     try { audio.pause(); loopVid.pause(); } catch {}
     stopSpeaking();

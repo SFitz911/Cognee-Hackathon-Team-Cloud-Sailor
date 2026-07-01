@@ -32,16 +32,22 @@ function checkCode() {
   updateGate();
 }
 
-/* Founder chat — Chow drops a random line + talks. */
+/* Founder chat — Chow drops a random line + talks, then stops (no endless loop). */
 async function chowSays() {
   const line = $("#fc-line"), vid = $("#fc-vid");
-  try { vid.play().catch(() => {}); } catch {}
+  try { vid.currentTime = 0; vid.play().catch(() => {}); } catch {}
   if (!chowClips) { try { chowClips = await fetch("/media/audio/chow_manifest.json").then((r) => r.json()); } catch { chowClips = []; } }
   if (chowClips.length) {
     const c = chowClips[Math.floor(Math.random() * chowClips.length)];
     line.textContent = "“" + c.text + "”";
-    try { new Audio(c.file).play().catch(() => {}); } catch {}
+    try {
+      const a = new Audio(c.file);
+      a.onended = () => { try { vid.pause(); } catch {} };   // stop the video when the line ends
+      a.play().catch(() => {});
+    } catch {}
   }
+  // Safety: if the video is longer than the line, stop it when it ends.
+  vid.onended = () => { try { vid.pause(); } catch {} };
 }
 
 async function refreshAuthStatus() {

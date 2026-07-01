@@ -8,7 +8,7 @@ const CAMEO = {
   image: "/images/Founder.png",
   pinky: "/images/pinky.png",
   manifest: "/media/audio/chow_manifest.json",
-  clip: "/media/clips/founder_cameo.mp4",
+  loop: "/media/clips/founder_talk.mp4",   // generative talking loop (muted), if present
 };
 
 const CHOW_FALLBACK = [
@@ -52,6 +52,7 @@ function buildCameoOverlay() {
       <button class="cameo-close" type="button" aria-label="Close">✕</button>
       <span class="cameo-tag">AI CAMEO · MR. CHOW</span>
       <div class="cameo-stage" id="cameo-stage">
+        <video class="cameo-loop hidden" muted loop playsinline></video>
         <img class="cameo-face" src="${CAMEO.image}" alt="Cognee founder as Mr. Chow" />
         <div class="cameo-ring"></div>
         <img class="cameo-pinky" src="${CAMEO.pinky}" alt="Pinky trots by" />
@@ -120,6 +121,16 @@ async function openCameo(kind = "intro") {
   audio.crossOrigin = "anonymous";
   const analyser = makeAnalyser(audio);
   let stopMotion = null;
+
+  // If a generative talking loop exists, use it as the avatar (muted, looped).
+  const loopVid = overlay.querySelector(".cameo-loop");
+  const face = overlay.querySelector(".cameo-face");
+  loopVid.src = CAMEO.loop;
+  loopVid.onloadeddata = () => {
+    loopVid.classList.remove("hidden");
+    face.classList.add("hidden");
+    loopVid.play().catch(() => {});
+  };
 
   const startSpeaking = () => {
     stage.classList.add("speaking");

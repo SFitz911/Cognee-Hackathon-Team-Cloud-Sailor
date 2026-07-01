@@ -654,7 +654,8 @@ iframe.explorer-graph { background: #fff; }
   position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1;
   background: #050409; border: 1px solid var(--line);
 }
-.cameo-face { width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: center 85%; }
+.cameo-face, .cameo-loop { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cameo-face { transform-origin: center 85%; }
 .cameo-face { animation: kenburns 9s ease-in-out infinite alternate; }
 /* while a clip plays, the jaw/head reacts to the live audio amplitude (--talk) */
 .cameo-stage.speaking .cameo-face {

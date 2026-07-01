@@ -210,7 +210,24 @@ def cognee_graph(dataset: Optional[str] = None) -> HTMLResponse:
         html = client.visualize_html(dataset)
     except CogneeError as e:
         raise HTTPException(status_code=502, detail=str(e)) from e
-    return HTMLResponse(content=html)
+    return HTMLResponse(content=_dark_schema(html))
+
+
+def _dark_schema(html: str) -> str:
+    """Force the embedded Cognee viz to open in dark theme on the Schema tab."""
+    html = html.replace('<html lang="en" class="light">', '<html lang="en" class="dark">')
+    inject = (
+        "<script>"
+        "try{localStorage.setItem('cognee-viz-theme','dark');}catch(e){}"
+        "(function(){var picked=false;"
+        "function dark(){try{var h=document.documentElement;h.classList.remove('light');h.classList.add('dark');}catch(e){}}"
+        "function schema(){if(picked)return;try{var s=document.querySelector('.tab-btn[data-view=\"schema\"]');"
+        "if(s){s.click();picked=true;}}catch(e){}}"
+        "dark();var t=setInterval(function(){dark();schema();if(picked)clearInterval(t);},250);"
+        "setTimeout(function(){clearInterval(t);},4000);})();"
+        "</script>"
+    )
+    return html.replace("</head>", inject + "</head>", 1)
 
 
 @app.get("/memory/search")

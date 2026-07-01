@@ -225,6 +225,49 @@ uvicorn backend.api:app --reload   # http://127.0.0.1:8000
 
 Deploy: `render.yaml` Blueprint (Docker) — see `docs/DEPLOY.md`.
 
+## 🎓 Lessons learned (how the build actually evolved)
+
+Real engineering is a sequence of "it works… but" moments. A few that shaped this app:
+
+- **Talking founder: text-to-lips is the wrong order.** Our first cameo played a muted
+  generative video with a separate TTS track over it — the lips never matched. The fix
+  was to invert it: bake our accented voice **into** the video with **fal.ai lip-sync**,
+  so the mouth follows *our* audio. We also stopped routing the video through Web Audio
+  (a suspended AudioContext was desyncing/muting it). Same bug bit Page 3 later; we moved
+  it to the same lip-synced clips.
+- **"Not all the founder lines show up."** Turned out to be **browser cache**, not missing
+  files — the app was serving JS/CSS with no cache rules, so phones ran stale code. Fixed
+  at the root: the backend now serves **HTML/JS/CSS with `no-cache`** (media stays cached),
+  so new UI ships without anyone needing a hard refresh.
+- **The face scan felt slow — was it calling out to something?** We traced it and proved
+  the face gate makes **zero network calls** (no HuggingFace, no Cognee, no DB). The delay
+  was loading the **open-source DeepFace model into RAM on the first scan**. Fixes: **warm
+  the model at server startup** in a background thread, **pre-bake the weights into the
+  Docker image**, and **pre-warm the backend when the poster (Page 1) loads** so it's ready
+  by Page 3. We also learned to **reject a bad enroll photo** (glasses/angle) up front with
+  on-screen tips, instead of silently saving a reference that fails later.
+- **A public link means strangers spend *your* AI budget.** The personas call Claude with
+  the owner's key. Before sharing widely we hardened it: **Claude Haiku in production**
+  (~15× cheaper than Opus), **per-IP rate limiting** (HTTP 429 past the budget), **tight
+  token caps**, key kept **server-side only**, and a **spend cap** in the Anthropic console.
+  Lesson: treat any owner-funded API behind a public demo as a spend surface, not a detail.
+- **Mobile ≠ desktop.** Page 5's graph cramped on phones (locked `100dvh`), so we let it
+  scroll with a dedicated graph block; a fixed-width scanner box wouldn't center under a
+  `text-align: center` parent (needs `margin: 0 auto`). Small CSS truths, real polish.
+- **Keep Cognee for what Cognee is best at.** We deliberately did **not** push faces or
+  blobs into Cognee — it's a *memory/knowledge-graph* layer for the case (clues, people,
+  places). Faces stay local; if we productionized enrollment we'd use **Supabase pgvector**
+  for embeddings. Using the right tool per job kept the "Best Use of Cognee" story clean.
+
+## 🧹 After the hackathon (site teardown)
+
+Once judging and the demo are complete, **the live site will be taken down**: the
+**Render** web service and any paid/cloud resources (Render instance, the Anthropic key
+on the deploy, fal.ai usage) will be **discontinued**, so `https://wolfpack-recall.onrender.com`
+may stop responding. **The full source stays public on GitHub** — anyone can read it,
+fork it, and run it locally (see **Run locally** above) with their own Cognee + Anthropic
+keys. In short: **the hosted demo is temporary; the code is permanent.**
+
 ## Tracks targeted
 Best Use of Cognee Cloud · Best Use of Open Source · Best Blogs · Social Buzz.
 

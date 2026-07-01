@@ -563,7 +563,7 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
 /* ============================================================
    PAGE 5 — FULL-SCREEN GRAPH EXPLORER
    ============================================================ */
-.explorer { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.explorer { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 
 /* control bar — its own row under the header */
 .explorer-bar {
@@ -584,9 +584,30 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
 div.explorer-graph { background: #09070c; overflow: hidden; }
 iframe.explorer-graph { background: #fff; }
 
+/* always-visible escape hatch on the full-screen graph page (mobile) */
+.explorer-exit { display: none; }
+
 @media (max-width: 760px) {
-  .explorer-bar { flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+  /* one scrollable row of controls instead of a cluttered wrap */
+  .explorer-bar { flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding: 8px 12px; -webkit-overflow-scrolling: touch; }
+  .explorer-bar .gtab { flex: 0 0 auto; font-size: 11px; padding: 6px 11px; }
+  .ds-picker { flex: 0 0 auto; }
+  .ds-picker select { min-width: 118px; }
   .explorer-hint { display: none; }
+  /* keep the header compact and its Back button tappable */
+  .explorer .topbar { flex-wrap: wrap; padding: 8px 12px; gap: 6px; }
+  .explorer .case-banner { display: none; }
+  /* floating exit so users can always leave the graph */
+  .explorer-exit {
+    display: block; position: fixed; top: 10px; right: 10px; z-index: 950;
+    background: rgba(12,10,15,0.9); color: var(--ink); border: 1px solid var(--magenta);
+    border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 700; text-decoration: none;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  /* the chat dock is smaller so it doesn't cover the graph on phones */
+  .ask-dock { right: 10px; bottom: 10px; }
+  .ask-launch { font-size: 12px; padding: 10px 14px; }
+  .ask-panel { height: 60vh; }
 }
 
 /* Cognee explainer overlay (page 5) */

@@ -399,7 +399,40 @@ async function loadSeed() {
   btn.textContent = "Load the case clue pack ↩";
 }
 
+/* ====================== AUTO DETECTIVE ====================== */
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function autoStatus(t) { const el = document.getElementById("auto-status"); if (el) el.textContent = t; }
+
+async function autoDetective() {
+  const btn = document.getElementById("auto-detective");
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = "🔎 INVESTIGATING…";
+  try {
+    if (!clues.length) {
+      autoStatus("① Loading the clue pack into Cognee memory…");
+      await loadSeed();
+      await sleep(500);
+    }
+    for (let i = 0; i < clues.length; i++) {
+      const c = clues[i];
+      autoStatus(`② Fact-checking clue ${i + 1}/${clues.length} against Cognee memory…`);
+      if (c.verdict === "pending" || c.verdict === "checking") await checkClue(c);
+      await sleep(750);
+    }
+    autoStatus("③ Asking the Wolfpack to reason over the memory…");
+    await investigate();
+    autoStatus("✓ Case cracked — verified clues turned green and Pinky's on her way to the gym. 🐕");
+  } catch (e) {
+    autoStatus("Auto Detective hit a snag: " + e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+}
+
 /* ====================== WIRE-UP ====================== */
+document.getElementById("auto-detective").addEventListener("click", autoDetective);
 $("#add-clue").addEventListener("click", () => {
   addClue($("#clue-text").value, $("#clue-nodeset").value);
   $("#clue-text").value = "";

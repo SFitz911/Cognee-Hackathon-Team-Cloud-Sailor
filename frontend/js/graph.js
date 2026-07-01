@@ -134,62 +134,41 @@ function openAsk(open) {
     askBubble("Hi! I'm the Cognee Guide. Ask me anything about Cognee, or tell me where you're stuck and I'll walk you through it.", "bot");
   }
 }
-/* The chat uses Puter.js — free, keyless, client-side AI (Puter's user-pays
-   model), so it works for ANY visitor at no cost to the app owner. If Puter is
-   unavailable, it falls back to a built-in help answer. */
-const GUIDE = [
-  "You are the Cognee Guide — a friendly, concise help assistant in the 'Hangover 4: Berlin /",
-  "Wolfpack Recall' hackathon app. Help users (1) understand Cognee and (2) get unstuck in the app.",
-  "Keep answers SHORT (2-5 sentences), warm, practical; use a concrete example when useful.",
-  "",
-  "COGNEE: an open-source AI memory layer for agents. Core API: remember() (ingest+cognify text",
-  "into a knowledge graph), recall() (query via GRAPH_COMPLETION + other modes), improve(), forget().",
-  "It builds a HYBRID vector + knowledge graph, grounds entities into an ontology, supports datasets",
-  "and node_sets, runs on Cognee Cloud or self-hosted, and connects to agents via MCP. Beats plain RAG.",
-  "",
-  "THIS APP (5 pages): (1) Intro. (2) Investigation — add clues (each is remembered into Cognee),",
-  "click 'Ask the Wolfpack' so 4 AI personalities reason over Cognee's GRAPH_COMPLETION, and mark",
-  "clues true/false or '🔍 check' to fact-check against memory (green=true, red=false); Pinky walks",
-  "the storyline route as clues are confirmed. (3) Access — the reunion video shows the belly code",
-  "(8675309); type it in and scan your face; ENTER unlocks when both pass. (4) Success — the dog-show",
-  "win. (5) This page — the LIVE Cognee graph (toggle 'Cognee Brain' vs 'Storyline map', switch",
-  "datasets like pinky_serbia or mr_chow). If they're stuck, give step-by-step help for their task.",
-].join("\n");
-
+/* Built-in Cognee guide — a keyword-matched help assistant. No external AI, no
+   login, no cost, works on every device (including iPhone). Answers the common
+   "what is Cognee?" and "I'm stuck" questions. */
 const FAQ = [
-  [/what.*cognee|about cognee|explain cognee/i, "Cognee is an open-source AI memory layer for agents. You remember() text into a hybrid vector + knowledge graph, then recall() connected facts (its GRAPH_COMPLETION fuses everything into one grounded answer). It grounds entities into an ontology, supports datasets/node_sets, runs on Cognee Cloud or self-hosted, and plugs into agents via MCP — beating plain RAG on long-context memory."],
-  [/investigat|add.*clue|ask.*wolfpack|page 2/i, "On the Investigation page: type a clue and hit '+ Remember' (it's stored in Cognee) — it appears as a node under Pinky. Click 'ASK THE WOLFPACK' so the 4 AI minds reason over Cognee's memory. Mark each clue ✓/✗, or '🔍 check' to fact-check it against memory (green=true, red=false). Confirming true clues walks Pinky toward the gym."],
-  [/stuck|code|access|8675309|scan|face|page 3|get in/i, "On the Access page: watch the reunion video — Pinky stands up and her belly shows the code 8675309. Type 8675309 into the code box and hit Unlock, then Start camera → Enroll my face → Scan. When both the code and face check out, the 'ENTER THE GYM' button appears."],
-  [/graph|brain|schema|dataset|page 5|memory graph/i, "This page shows Cognee's real knowledge graph. Use 'Cognee Brain' for the live Cognee UI or 'Storyline map' for our narrative view, and switch the dataset (e.g. pinky_serbia or mr_chow) to explore different memories. It's the actual memory Cognee built from your clues — not a mockup."],
-  [/how.*win|dog show|page 4|success/i, "After you get into the gym (code + face), you reach the Success page and the dog-show win video plays automatically — Pinky takes Best in Show. Then click through to see the Cognee memory graph."],
+  [/what.*cognee|about cognee|explain cognee|cognee\?|is cognee/i,
+    "Cognee is an open-source AI memory layer for agents. You remember() text and it cognifies it into a HYBRID vector + knowledge graph; then recall() returns connected facts — its GRAPH_COMPLETION fuses everything into one grounded answer. It grounds entities into an ontology, supports datasets & node_sets, runs on Cognee Cloud or self-hosted, and plugs into agents via MCP — beating plain RAG on long-context memory."],
+  [/remember|recall|how.*(work|memory)|graph_completion|cognify|vector|ontology/i,
+    "Cognee's core is simple: remember(text) ingests + cognifies it into a knowledge graph, and recall(query) answers over it. GRAPH_COMPLETION walks the graph to fuse all related facts into one grounded answer (why it beats plain RAG). It also grounds entities into an ontology and stores hybrid vector + graph memory. In this app, every clue you add is remembered, and the 4 personas reason over recall()."],
+  [/investigat|add.*clue|\+ remember|wolfpack|page ?2|detective|clue/i,
+    "Investigation page: type a clue and hit '+ Remember' (stored in Cognee) — it appears as a node under Pinky. Click 'ASK THE WOLFPACK' so 4 AI minds reason over Cognee's memory. Mark clues ✓/✗ or '🔍 check' to fact-check them against memory (green=true, red=false). Or just hit '🕵️ AUTO DETECTIVE' to solve the whole case automatically and walk Pinky to the gym."],
+  [/stuck|code|8675309|access|scan|face|enter the gym|page ?3|get in|locker/i,
+    "Access page: watch the reunion video — Pinky stands up and her belly shows the code 8675309. Type 8675309 in the code box → Unlock. Then Start camera → Enroll my face → Scan. When BOTH the code ✓ and face ✓ pass, the 'ENTER THE GYM' button appears. (You can also use the Back/Next buttons to move around.)"],
+  [/graph|brain|schema|dataset|page ?5|memory graph|explore/i,
+    "This page is Cognee's real knowledge graph. Toggle 'Cognee Brain' (the live Cognee UI) vs 'Storyline map' (our narrative), and switch the dataset (pinky_serbia or mr_chow) to explore different memories. It's the actual memory Cognee built from the clues — not a mockup."],
+  [/win|dog show|best in show|page ?4|success|prize/i,
+    "After you enter the gym (code + face), the Success page plays the dog-show video — Pinky takes Best in Show, and a 'YOU'RE THE WINNER' banner appears at the end. Then continue to see the Cognee memory graph that made it possible."],
+  [/model|open.?source|tech|built with|deepface|flux|fal|edge.?tts|which ai/i,
+    "Tech used: Cognee Cloud (memory graph), Claude Opus 4.x (the 4 personas + fact-check), DeepFace (face ID), FLUX.1-schnell + Omni-Video-Factory (Hugging Face Spaces, free), fal.ai sync-lipsync (founder lip-sync), edge-tts (accented voice), FastAPI + vis-network, deployed on Render. We leaned on free/open tools wherever possible."],
+  [/chow|founder|cameo|mr.?chow|voice/i,
+    "The 🎬 Founder button plays a cameo of the Cognee founder in 'Mr. Chow mode' — real lip-synced videos (fal.ai) with an accented voice. His one-liners come from the mr_chow dataset, which we also ingested into Cognee as its own memory graph (switch the dataset picker to see it)."],
+  [/story|what is this|hangover|pinky|plot|about (the )?app/i,
+    "The story: four friends wake up in Berlin with no memory of last night, their dog Pinky is gone, and the code to a locker at a gym in Serbia is tattooed on her belly. Using Cognee's memory, you reconstruct the night, recover Pinky, crack the code, get in, and win the dog show. The hangover = lost context; Cognee = the memory that survived."],
+  [/mcp|integrat|self.?host|cloud|deploy/i,
+    "Cognee runs on Cognee Cloud (managed) or self-hosted, and connects to agents over MCP (Claude Code, Cursor, VS Code, n8n, etc.) — 'one memory, many agents.' This app talks to Cognee Cloud via remember/recall and embeds Cognee's own visualize graph on this page."],
 ];
 function faqAnswer(q) {
   for (const [re, a] of FAQ) if (re.test(q)) return a;
-  return "I'm the Cognee Guide! Cognee is an open-source AI memory layer — remember() stores text into a knowledge graph, recall() answers over it. Try: “What is Cognee?”, “How do I investigate?”, or tell me exactly where you're stuck.";
-}
-function extractPuter(r) {
-  if (!r) return "";
-  if (typeof r === "string") return r;
-  if (r.message) { const c = r.message.content; if (typeof c === "string") return c; if (Array.isArray(c)) return c.map((x) => x.text || "").join(""); }
-  return r.text || String(r);
+  return "I'm the Cognee Guide. Cognee is an open-source AI memory layer — remember() stores text into a knowledge graph and recall() answers over it. Try a chip below, or ask: “What is Cognee?”, “How does remember/recall work?”, “How do I investigate?”, or tell me exactly where you're stuck.";
 }
 async function askSend(question) {
   if (!question.trim()) return;
   askBubble(question, "me");
   const thinking = askBubble("…", "bot");
-  try {
-    if (window.puter && puter.ai && puter.ai.chat) {
-      const resp = await puter.ai.chat(
-        [{ role: "system", content: GUIDE }, { role: "user", content: question }],
-        { model: "gpt-4o-mini" }
-      );
-      thinking.textContent = extractPuter(resp).trim() || faqAnswer(question);
-    } else {
-      thinking.textContent = faqAnswer(question);
-    }
-  } catch (e) {
-    thinking.textContent = faqAnswer(question);
-  }
+  await new Promise((r) => setTimeout(r, 350));   // tiny delay so it reads like a reply
+  thinking.textContent = faqAnswer(question);
 }
 
 document.getElementById("ask-toggle").addEventListener("click", () => openAsk(true));

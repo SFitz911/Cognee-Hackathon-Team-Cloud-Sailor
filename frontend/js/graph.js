@@ -131,7 +131,7 @@ function openAsk(open) {
   document.getElementById("ask-toggle").classList.toggle("hidden", open);
   if (open && !askGreeted) {
     askGreeted = true;
-    askBubble("Hi! I'm the Cognee Guide. Ask me anything about Cognee, or tell me where you're stuck and I'll walk you through it.", "bot");
+    askBubble("Hi! I'm the Cognee Guide. Ask me anything about Cognee, or tell me where you're stuck and I'll walk you through it. Want deeper answers? Tap “Enable free AI (Puter)” below — it's free.", "bot");
   }
 }
 /* Built-in Cognee guide — a keyword-matched help assistant. No external AI, no
@@ -163,17 +163,75 @@ function faqAnswer(q) {
   for (const [re, a] of FAQ) if (re.test(q)) return a;
   return "I'm the Cognee Guide. Cognee is an open-source AI memory layer — remember() stores text into a knowledge graph and recall() answers over it. Try a chip below, or ask: “What is Cognee?”, “How does remember/recall work?”, “How do I investigate?”, or tell me exactly where you're stuck.";
 }
+/* Optional: users can enable Puter (free AI) for smarter, more detailed answers.
+   It's OFF by default (the built-in guide needs no login); enabling it loads Puter
+   on demand and may ask for a quick free Puter sign-in. */
+let usePuter = false;
+const PUTER_GUIDE =
+  "You are the Cognee Guide in the 'Hangover 4: Berlin / Wolfpack Recall' hackathon app. " +
+  "Help users understand Cognee and get unstuck. Keep answers concise and practical. " +
+  "COGNEE = open-source AI memory layer: remember() ingests+cognifies text into a hybrid " +
+  "vector+knowledge graph; recall() answers via GRAPH_COMPLETION; ontology, datasets, node_sets, " +
+  "Cognee Cloud or self-hosted, MCP integrations; beats plain RAG. THIS APP (5 pages): 1 Intro, " +
+  "2 Investigation (add clues=remember, Ask the Wolfpack, 🔍 check=fact-check, Auto Detective), " +
+  "3 Access (reunion video shows code 8675309, enter it + scan face), 4 Success (dog-show win), " +
+  "5 this live Cognee graph (Brain vs Storyline map, datasets pinky_serbia / mr_chow).";
+
+function loadPuter() {
+  return new Promise((resolve, reject) => {
+    if (window.puter) return resolve();
+    const s = document.createElement("script");
+    s.src = "https://js.puter.com/v2/";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Puter failed to load"));
+    document.head.appendChild(s);
+  });
+}
+async function enablePuter() {
+  const btn = document.getElementById("enable-ai");
+  btn.disabled = true;
+  btn.textContent = "Enabling free AI…";
+  try {
+    await loadPuter();
+    usePuter = true;
+    btn.textContent = "✓ Free AI enabled";
+    askBubble("Free AI is on — ask me anything about Cognee and I'll go deeper. (Puter may ask for a quick, free one-time sign-in.)", "bot");
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "✨ Enable free AI (Puter) for more detailed answers";
+    askBubble("Couldn't load Puter right now — no worries, the built-in guide still works.", "bot");
+  }
+}
+function extractPuter(r) {
+  if (!r) return "";
+  if (typeof r === "string") return r;
+  if (r.message) { const c = r.message.content; if (typeof c === "string") return c; if (Array.isArray(c)) return c.map((x) => x.text || "").join(""); }
+  return r.text || String(r);
+}
+
 async function askSend(question) {
   if (!question.trim()) return;
   askBubble(question, "me");
   const thinking = askBubble("…", "bot");
-  await new Promise((r) => setTimeout(r, 350));   // tiny delay so it reads like a reply
+  await new Promise((r) => setTimeout(r, 300));
+  if (usePuter && window.puter && puter.ai && puter.ai.chat) {
+    try {
+      const resp = await puter.ai.chat(
+        [{ role: "system", content: PUTER_GUIDE }, { role: "user", content: question }],
+        { model: "gpt-4o-mini" }
+      );
+      const txt = extractPuter(resp).trim();
+      thinking.textContent = txt || faqAnswer(question);
+      return;
+    } catch (e) { /* fall back to the built-in guide */ }
+  }
   thinking.textContent = faqAnswer(question);
 }
 
 document.getElementById("ask-toggle").addEventListener("click", () => openAsk(true));
 document.getElementById("ask-btn-top").addEventListener("click", () => openAsk(true));
 document.getElementById("ask-min").addEventListener("click", () => openAsk(false));
+document.getElementById("enable-ai").addEventListener("click", enablePuter);
 document.getElementById("ask-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = document.getElementById("ask-input");

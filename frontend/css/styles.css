@@ -288,13 +288,19 @@ textarea:focus, input:focus, select:focus {
   color: var(--ink-faint); margin-bottom: 6px;
 }
 .poster-title { margin: 0; display: flex; flex-direction: column; align-items: center; line-height: 0.86; }
-.t-the { font-family: "Bebas Neue"; font-size: clamp(18px, 2.4vw, 30px); letter-spacing: 10px; color: var(--ink-dim); }
+.t-the {
+  font-family: "Bebas Neue"; font-size: clamp(20px, 2.6vw, 34px); letter-spacing: 10px;
+  color: #ffd447; font-weight: 700; text-shadow: 0 0 16px rgba(255,196,60,0.55);
+}
 .t-hang {
   font-family: "Anton", sans-serif; font-size: clamp(48px, 11vw, 150px); letter-spacing: 1px;
   color: #fff; text-shadow: 0 0 30px rgba(255,61,139,0.6), 0 4px 0 #2a1020;
-  -webkit-text-stroke: 2px rgba(255,61,139,0.35);
+  -webkit-text-stroke: 2px rgba(255,196,60,0.55);
 }
-.t-part { font-family: "Bebas Neue"; font-size: clamp(14px, 2vw, 24px); letter-spacing: 8px; color: var(--rust); margin: 6px 0; }
+.t-part {
+  font-family: "Bebas Neue"; font-size: clamp(16px, 2.2vw, 27px); letter-spacing: 8px;
+  color: #ffd447; font-weight: 700; margin: 6px 0; text-shadow: 0 0 16px rgba(255,196,60,0.6);
+}
 .t-berlin {
   font-family: "Anton", sans-serif; font-size: clamp(60px, 16vw, 230px); letter-spacing: 2px;
   background: linear-gradient(180deg, #ff5ea0 0%, #ff3d8b 40%, var(--rust) 100%);

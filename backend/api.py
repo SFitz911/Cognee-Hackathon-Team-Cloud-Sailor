@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -56,6 +56,48 @@ async def _no_cache_code(request, call_next):
     if path.endswith((".html", ".js", ".css")) or path == "/":
         response.headers["Cache-Control"] = "no-cache, must-revalidate"
     return response
+
+
+# -- per-IP rate limiting for the paid (Claude-backed) endpoints -------------
+# Protects the owner's Anthropic account: strangers can't hammer the AI. In-memory
+# sliding window — fine for a single-instance deploy.
+import threading as _threading
+import time as _time
+
+_RATE_MAX = int(os.getenv("WOLFPACK_RATE_MAX", "6"))
+_RATE_WINDOW = int(os.getenv("WOLFPACK_RATE_WINDOW", "600"))  # seconds
+_rate_hits: dict[str, list[float]] = {}
+_rate_lock = _threading.Lock()
+
+
+def _client_ip(request: Request) -> str:
+    # Render sits behind a proxy; trust X-Forwarded-For's first hop.
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def rate_limit(request: Request) -> None:
+    """Raise HTTP 429 if this IP exceeded the AI call budget for the window."""
+    if _RATE_MAX <= 0:
+        return
+    ip = _client_ip(request)
+    now = _time.time()
+    with _rate_lock:
+        hits = [t for t in _rate_hits.get(ip, []) if now - t < _RATE_WINDOW]
+        if len(hits) >= _RATE_MAX:
+            retry = int(_RATE_WINDOW - (now - hits[0])) + 1
+            raise HTTPException(
+                status_code=429,
+                detail=(
+                    f"Whoa — that's a lot of AI requests. Please wait ~{retry}s and try "
+                    "again. (The live demo rate-limits AI calls to keep it free for everyone.)"
+                ),
+                headers={"Retry-After": str(retry)},
+            )
+        hits.append(now)
+        _rate_hits[ip] = hits
 
 
 @app.on_event("startup")
@@ -142,7 +184,7 @@ def add_clue(clue: ClueIn) -> dict:
 
 
 @app.post("/investigate")
-def investigate(req: InvestigateIn) -> dict:
+def investigate(req: InvestigateIn, _: None = Depends(rate_limit)) -> dict:
     try:
         pack = get_wolfpack()
     except CogneeError as e:
@@ -152,7 +194,7 @@ def investigate(req: InvestigateIn) -> dict:
 
 
 @app.post("/validate")
-def validate(req: ValidateIn) -> dict:
+def validate(req: ValidateIn, _: None = Depends(rate_limit)) -> dict:
     """Fact-check a clue against the Cognee case memory -> true | false | unknown."""
     try:
         pack = get_wolfpack()
@@ -194,7 +236,7 @@ def cameo_lines(kind: str = "any", n: int = 1, max_len: int = 72) -> dict:
 
 
 @app.post("/cognee/ask")
-def cognee_ask(req: AskIn) -> dict:
+def cognee_ask(req: AskIn, _: None = Depends(rate_limit)) -> dict:
     """Cognee help assistant — explains Cognee and helps users who are stuck."""
     try:
         pack = get_wolfpack()

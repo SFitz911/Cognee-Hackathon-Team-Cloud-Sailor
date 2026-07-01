@@ -81,7 +81,7 @@ See **`docs/COGNEE_SHOWCASE.md`** for the full mapping and pitch walkthrough.
 | Purpose | Model / service | Open? | Cost model |
 |---------|-----------------|-------|-----------|
 | **Memory / knowledge graph** | **Cognee** (Cloud) | **Open source** | Free dev plan |
-| 4 investigation personalities + fact-check | **Claude (Opus 4.x)** via Anthropic API | Proprietary | App key |
+| 4 investigation personalities + fact-check | **Claude** — Opus 4.x locally, **Haiku 4.5 on the public deploy** | Proprietary | App key (rate-limited) |
 | **Movie poster** | **FLUX.1-schnell** via a free **Hugging Face Space** | **Open source** | Free (HF Space) |
 | **Founder talking videos** | **Omni-Video-Factory** image-to-video HF Space | Open weights | Free (HF Space) |
 | **Real lip-sync** (founder mouths the lines) | **fal.ai `sync-lipsync`** | Hosted | ~cents/clip |
@@ -92,6 +92,25 @@ See **`docs/COGNEE_SHOWCASE.md`** for the full mapping and pitch walkthrough.
 **Why these choices:** we leaned on **free/open** tooling wherever possible (HF Spaces,
 edge-tts, DeepFace, Puter) so the app is reproducible and cheap, and reserved paid calls
 (fal.ai lip-sync) for the one thing open Spaces couldn't do reliably.
+
+### Protecting the Anthropic account on a public link
+
+The Wolfpack personas, fact-check, and guide call **Claude with the app owner's Anthropic
+key** (server-side — the key is **never** sent to the browser and is only read from an
+environment variable, never committed to git). Because the demo is shared publicly, we
+hardened it so strangers can't run up the owner's bill:
+
+- **Cheaper model in production** — the public deploy runs **Claude Haiku 4.5** (~15×
+  cheaper than Opus) via the `WOLFPACK_MODEL` env var; Opus is used only for local demos.
+- **Tight token caps** — personas answer in one sentence (`max_tokens` 90 / 40 / 320).
+- **Per-IP rate limiting** — the Claude-backed endpoints (`/investigate`, `/validate`,
+  `/cognee/ask`) allow ~6 calls per IP per 10 min (configurable), returning HTTP 429 past
+  that. Tunable via `WOLFPACK_RATE_MAX` / `WOLFPACK_RATE_WINDOW`.
+- **Owner spend cap** — a hard monthly usage limit is set in the Anthropic console, so
+  spend simply stops if the cap is ever reached.
+
+Net effect: a bounded, pennies-scale cost even under public traffic, and the key itself
+is unreachable by end users.
 
 ---
 

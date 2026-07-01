@@ -1,16 +1,21 @@
 /* Founder cameo — Mr. Chow mode. Plays pre-generated accented audio clips
-   (edge-tts, Chinese-accented voice) while the avatar actively "talks" with a
-   bob + pulsing ring + sound bars (no lip-sync needed). Falls back to browser
-   speech if the clips aren't available. Labelled as an AI parody. */
+   (edge-tts) and drives the avatar's motion from the REAL audio amplitude via
+   Web Audio (jaw/head moves + sound bars react in sync with his speech). Pinky
+   trots across while he talks. If a lip-synced MP4 exists at CAMEO.clip it plays
+   that instead. Labelled as an AI parody. */
 
-const CAMEO = { image: "/images/Founder.png", manifest: "/media/audio/chow_manifest.json" };
+const CAMEO = {
+  image: "/images/Founder.png",
+  pinky: "/images/pinky.png",
+  manifest: "/media/audio/chow_manifest.json",
+  clip: "/media/clips/founder_cameo.mp4",
+};
 
 const CHOW_FALLBACK = [
   "Toodaloo, mother-truckers!",
   "I walk into rooms and gravity applauds.",
   "And that's how you leave a room. You're welcome.",
 ];
-
 const KIND_CATS = {
   intro: ["Greeting", "Party", "Brag", "Confidence"],
   solved: ["Party", "Confidence", "Exit", "Brag"],
@@ -22,21 +27,16 @@ let CLIPS = null;
 
 async function loadClips() {
   if (CLIPS) return CLIPS;
-  try {
-    CLIPS = await fetch(CAMEO.manifest).then((r) => r.json());
-  } catch { CLIPS = []; }
+  try { CLIPS = await fetch(CAMEO.manifest).then((r) => r.json()); }
+  catch { CLIPS = []; }
   return CLIPS;
 }
 
 function pickClips(kind, n) {
   const cats = KIND_CATS[kind];
   let pool = CLIPS.slice();
-  if (cats) {
-    const filtered = pool.filter((c) => cats.includes(c.category));
-    if (filtered.length) pool = filtered;
-  }
+  if (cats) { const f = pool.filter((c) => cats.includes(c.category)); if (f.length) pool = f; }
   pool.sort(() => Math.random() - 0.5);
-  // For intro, lead with a Greeting if we have one.
   if (kind === "intro") {
     const g = pool.findIndex((c) => c.category === "Greeting");
     if (g > 0) pool.unshift(pool.splice(g, 1)[0]);
@@ -54,7 +54,8 @@ function buildCameoOverlay() {
       <div class="cameo-stage" id="cameo-stage">
         <img class="cameo-face" src="${CAMEO.image}" alt="Cognee founder as Mr. Chow" />
         <div class="cameo-ring"></div>
-        <div class="cameo-bars"><i></i><i></i><i></i><i></i><i></i></div>
+        <img class="cameo-pinky" src="${CAMEO.pinky}" alt="Pinky trots by" />
+        <div class="cameo-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="cameo-name">THE FOUNDER OF <b>COGNEE</b> · CHOW MODE</div>
       <div class="cameo-subtitle" id="cameo-sub">…</div>
@@ -63,37 +64,46 @@ function buildCameoOverlay() {
   return wrap;
 }
 
-/* Play a sequence of audio clips; animate the avatar while each plays. */
-function playClips(clips, stage, sub, audio, onDone) {
-  let i = 0;
-  const next = () => {
-    if (i >= clips.length) { stage.classList.remove("speaking"); return onDone && onDone(); }
-    const clip = clips[i++];
-    sub.textContent = clip.text;
-    audio.src = clip.file;
-    audio.play().then(() => stage.classList.add("speaking")).catch(() => next());
-  };
-  audio.onended = next;
-  audio.onerror = next;
-  next();
+/* Web Audio: read the clip's live amplitude to drive the "talking" motion. */
+function makeAnalyser(audio) {
+  try {
+    const AC = new (window.AudioContext || window.webkitAudioContext)();
+    const src = AC.createMediaElementSource(audio);
+    const an = AC.createAnalyser();
+    an.fftSize = 256;
+    src.connect(an); an.connect(AC.destination);
+    const buf = new Uint8Array(an.frequencyBinCount);
+    return {
+      resume: () => AC.resume(),
+      level: () => {
+        an.getByteTimeDomainData(buf);
+        let s = 0;
+        for (const v of buf) { const d = (v - 128) / 128; s += d * d; }
+        return Math.min(1, Math.sqrt(s / buf.length) * 3.2);
+      },
+    };
+  } catch { return null; }
 }
 
-/* Browser-speech fallback (no clips available). */
-function speakFallback(lines, stage, sub, onDone) {
-  const synth = window.speechSynthesis;
-  if (!synth) { sub.textContent = lines[0] || ""; return onDone && onDone(); }
-  synth.cancel();
-  let i = 0;
-  const next = () => {
-    if (i >= lines.length) { stage.classList.remove("speaking"); return onDone && onDone(); }
-    const u = new SpeechSynthesisUtterance(lines[i]);
-    sub.textContent = lines[i++];
-    u.pitch = 1.4; u.rate = 1.06;
-    u.onend = next; u.onerror = next;
-    stage.classList.add("speaking");
-    synth.speak(u);
+function driveMotion(stage, analyser) {
+  const bars = [...stage.querySelectorAll(".cameo-bars i")];
+  let raf;
+  const tick = () => {
+    const lvl = analyser ? analyser.level() : 0.3 + Math.random() * 0.3;
+    stage.style.setProperty("--talk", lvl.toFixed(3));
+    bars.forEach((b, i) => {
+      const j = 0.6 + 0.8 * Math.abs(Math.sin(Date.now() / 90 + i));
+      b.style.height = Math.max(6, lvl * 26 * j).toFixed(0) + "px";
+    });
+    raf = requestAnimationFrame(tick);
   };
-  next();
+  tick();
+  return () => cancelAnimationFrame(raf);
+}
+
+function pinkyWalk(stage) {
+  stage.classList.add("pinky-walk");
+  setTimeout(() => stage.classList.remove("pinky-walk"), 4200);
 }
 
 async function openCameo(kind = "intro") {
@@ -107,9 +117,24 @@ async function openCameo(kind = "intro") {
   const sub = overlay.querySelector("#cameo-sub");
   const another = overlay.querySelector("#cameo-another");
   const audio = new Audio();
+  audio.crossOrigin = "anonymous";
+  const analyser = makeAnalyser(audio);
+  let stopMotion = null;
+
+  const startSpeaking = () => {
+    stage.classList.add("speaking");
+    if (analyser) analyser.resume();
+    if (!stopMotion) stopMotion = driveMotion(stage, analyser);
+  };
+  const stopSpeaking = () => {
+    stage.classList.remove("speaking");
+    if (stopMotion) { stopMotion(); stopMotion = null; }
+    stage.style.setProperty("--talk", 0);
+  };
 
   const close = () => {
     try { audio.pause(); } catch {}
+    stopSpeaking();
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     overlay.classList.remove("show");
     setTimeout(() => overlay.remove(), 300);
@@ -118,24 +143,52 @@ async function openCameo(kind = "intro") {
   overlay.querySelector(".cameo-close").addEventListener("click", close);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
 
+  function playClips(clips, onDone) {
+    let i = 0;
+    const next = () => {
+      if (i >= clips.length) { stopSpeaking(); return onDone && onDone(); }
+      const clip = clips[i++];
+      sub.textContent = clip.text;
+      audio.src = clip.file;
+      audio.play().then(startSpeaking).catch(next);
+      if (Math.random() < 0.5) pinkyWalk(stage);   // Pinky trots by sometimes
+    };
+    audio.onended = next;
+    audio.onerror = next;
+    next();
+  }
+
+  function speakFallback(lines) {
+    const synth = window.speechSynthesis;
+    if (!synth) { sub.textContent = lines[0] || ""; return; }
+    synth.cancel();
+    let i = 0;
+    const next = () => {
+      if (i >= lines.length) { stopSpeaking(); return; }
+      const u = new SpeechSynthesisUtterance(lines[i]);
+      sub.textContent = lines[i++];
+      u.pitch = 1.4; u.rate = 1.06;
+      u.onend = next; u.onerror = next;
+      startSpeaking();
+      synth.speak(u);
+    };
+    next();
+  }
+
   await loadClips();
 
-  const runOne = () => {
-    if (CLIPS.length) playClips(pickClips("any", 1), stage, sub, audio);
-    else speakFallback([CHOW_FALLBACK[Math.floor(Math.random() * CHOW_FALLBACK.length)]], stage, sub);
-  };
-  another.addEventListener("click", () => { try { audio.pause(); } catch {} runOne(); });
+  another.addEventListener("click", () => {
+    try { audio.pause(); } catch {}
+    if (CLIPS.length) playClips(pickClips("any", 1));
+    else speakFallback([CHOW_FALLBACK[Math.floor(Math.random() * CHOW_FALLBACK.length)]]);
+  });
 
-  if (CLIPS.length) {
-    playClips(pickClips(kind, 3), stage, sub, audio);
-  } else {
-    speakFallback(CHOW_FALLBACK, stage, sub);
-  }
+  if (kind === "solved") pinkyWalk(stage);
+  if (CLIPS.length) playClips(pickClips(kind, 3));
+  else speakFallback(CHOW_FALLBACK);
 }
 
-// warm up voices for the fallback path
 if (window.speechSynthesis) window.speechSynthesis.getVoices();
-
 document.addEventListener("click", (e) => {
   if (e.target.closest("#cameo-btn")) openCameo("intro");
 });

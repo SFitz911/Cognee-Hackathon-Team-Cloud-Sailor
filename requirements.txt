@@ -19,3 +19,4 @@ gradio_client>=1.0
 # Founder cameo voice clips — accented TTS (scripts/gen_chow_audio.py).
 # Not needed at runtime on the cloud: the mp3s are pre-generated and committed.
 edge-tts>=7.0
+fal-client>=0.5  # scripts/gen_lipsync_fal.py (lip-sync)

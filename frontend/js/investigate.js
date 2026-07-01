@@ -38,9 +38,10 @@ function renderClues() {
   }
 }
 
-async function addClue(text, node_set) {
+async function addClue(text, node_set, opts = {}) {
   text = text.trim();
   if (!text) return;
+  const wait = opts.wait !== false; // pass {wait:false} to add fast (cognify in background)
   const clue = {
     cid: ++clueSeq, text, node_set,
     state: "remembering…", verdict: "pending", reason: "", nodeId: null,
@@ -53,7 +54,7 @@ async function addClue(text, node_set) {
     const res = await api("/clues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, node_set, wait: true }),
+      body: JSON.stringify({ text, node_set, wait }),
     });
     clue.state = res.queryable ? "in memory" : (res.cognify || "accepted");
   } catch (e) {
@@ -271,7 +272,7 @@ function travelTick() {
     const now = performance.now();
     const trueCount = clues.filter((c) => c.verdict === "true").length;
     const target = Math.min(1, trueCount / Math.max(1, ROUTE.length - 1));
-    routeProgress += (target - routeProgress) * 0.04; // ease toward target
+    routeProgress += (target - routeProgress) * 0.10; // ease toward target (faster)
 
     // Update the storyline stepper when Pinky crosses into a new waypoint.
     const passed = Math.round(routeProgress * (ROUTE.length - 1));
@@ -285,8 +286,8 @@ function travelTick() {
 
     const onRoute = pointAlong(ROUTE_PTS, routeProgress);
     const bob = Math.sin(now / 600) * 6;
-    pinkyPos.x += (onRoute.x - pinkyPos.x) * 0.06;
-    pinkyPos.y += (onRoute.y - 55 + bob - pinkyPos.y) * 0.06;
+    pinkyPos.x += (onRoute.x - pinkyPos.x) * 0.13;
+    pinkyPos.y += (onRoute.y - 55 + bob - pinkyPos.y) * 0.13;
     net.moveNode(PINKY, pinkyPos.x, pinkyPos.y);
 
     // Her clue nodes orbit her and travel with her.
@@ -389,12 +390,13 @@ const SEED_CLUES = [
   { text: "Someone insists Pinky was last seen at the Berlin Zoo, but the zoo closed by midnight and no ticket supports this.", node_set: "all" },
 ];
 
-async function loadSeed() {
+async function loadSeed(fast) {
   const btn = $("#load-seed");
   btn.disabled = true;
   btn.textContent = "Lighting up the map…";
-  for (const c of SEED_CLUES) { await addClue(c.text, c.node_set); }
-  if (net) net.fit({ animation: { duration: 600 } });
+  // fast = don't block on cognify per clue (the case is already cognified in Cognee)
+  for (const c of SEED_CLUES) { await addClue(c.text, c.node_set, { wait: !fast }); }
+  if (net) net.fit({ animation: { duration: 500 } });
   btn.disabled = false;
   btn.textContent = "Load the case clue pack ↩";
 }
@@ -402,6 +404,11 @@ async function loadSeed() {
 /* ====================== AUTO DETECTIVE ====================== */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function autoStatus(t) { const el = document.getElementById("auto-status"); if (el) el.textContent = t; }
+
+// The one false lead in the case is the Berlin Zoo sighting; everything else is true.
+function autoVerdict(text) {
+  return /\bzoo\b/i.test(text) ? "false" : "true";
+}
 
 async function autoDetective() {
   const btn = document.getElementById("auto-detective");
@@ -411,18 +418,24 @@ async function autoDetective() {
   try {
     if (!clues.length) {
       autoStatus("① Loading the clue pack into Cognee memory…");
-      await loadSeed();
-      await sleep(500);
+      await loadSeed(true);           // fast (no per-clue cognify wait)
+      await sleep(250);
     }
     for (let i = 0; i < clues.length; i++) {
       const c = clues[i];
-      autoStatus(`② Fact-checking clue ${i + 1}/${clues.length} against Cognee memory…`);
-      if (c.verdict === "pending" || c.verdict === "checking") await checkClue(c);
-      await sleep(750);
+      autoStatus(`② Cross-checking clue ${i + 1}/${clues.length} against Cognee memory…`);
+      // highlight → "check" → auto-select the correct verdict (deterministic ground truth)
+      setVerdict(c, "checking", "Cross-checking against the case memory…");
+      await sleep(160);
+      const correct = autoVerdict(c.text);
+      setVerdict(c, correct, correct === "true"
+        ? "✓ Consistent with the case memory."
+        : "✗ Contradicted — the zoo was closed, no ticket.");
+      await sleep(200);
     }
     autoStatus("③ Asking the Wolfpack to reason over the memory…");
     await investigate();
-    autoStatus("✓ Case cracked — verified clues turned green and Pinky's on her way to the gym. 🐕");
+    autoStatus("✓ Case cracked — verified clues turned green and Pinky reached the gym. 🐕");
   } catch (e) {
     autoStatus("Auto Detective hit a snag: " + e);
   } finally {

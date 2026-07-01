@@ -439,6 +439,7 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
 .lg-dim { background: #161320; border: 2px solid #2a2533; }
 .lg-pending { background: #241f10; border: 2px solid #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.7); }
 .lg-refuted { background: #241016; border: 2px solid #ef4444; }
+.lg-unknown { background: #141320; border: 2px solid #38e1d6; box-shadow: 0 0 8px rgba(56,225,214,0.6); }
 .lg-path { width: 16px; height: 3px; border-radius: 2px; display: inline-block; background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
 .lg-route { width: 18px; height: 0; display: inline-block; border-top: 2px dashed rgba(150,146,165,0.6); }
 /* Auto Detective banner */

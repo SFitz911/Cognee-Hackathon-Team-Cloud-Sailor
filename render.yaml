@@ -1,19 +1,17 @@
 # Render Blueprint — Wolfpack Recall (Hangover 4: Berlin)
-# Deploy: push to GitHub, then Render Dashboard -> New -> Blueprint -> pick this repo.
-# Set the four secret env vars (sync:false) in the dashboard after creation.
+# Docker runtime so DeepFace/OpenCV (Page 3 Face ID) works in the cloud.
+# Deploy: push to GitHub, then Render Dashboard -> Blueprint -> Manual sync.
+# Set the four secret env vars (sync:false) in the dashboard.
 services:
   - type: web
     name: wolfpack-recall
-    runtime: python
-    plan: free
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: standard          # 2 GB RAM — needed for TensorFlow/DeepFace
     region: oregon
     branch: main
-    buildCommand: pip install -r requirements-render.txt
-    startCommand: uvicorn backend.api:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: COGNEE_DATASET
         value: pinky_serbia
       # --- secrets: set these in the Render dashboard (not committed) ---

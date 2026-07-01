@@ -482,3 +482,54 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
 .gate-meta .bad { color: var(--wildcard); }
 
 @keyframes scanmove { 0%,100% { top: 12%; } 50% { top: 86%; } }
+
+/* ============================================================
+   MOBILE / RESPONSIVE (phones, iPhone-friendly)
+   ============================================================ */
+@media (max-width: 760px) {
+  /* top bar wraps; the long case title drops to its own row */
+  .topbar { flex-wrap: wrap; gap: 8px 12px; padding: 12px 14px; }
+  .case-banner { order: 3; flex-basis: 100%; }
+  .case-title { font-size: 12px; }
+  .status { font-size: 11px; margin-left: auto; }
+  .brand-mark, .brand-sub { font-size: 24px; }
+
+  /* investigation stage */
+  .stage { margin-top: 16px; padding: 0 12px; }
+  .graph-big { height: 340px; }
+  iframe.graph-big { height: 360px; }
+  .graph-toggle { flex-wrap: wrap; }
+  .gtab { font-size: 11.5px; padding: 6px 12px; }
+  .stage-label { font-size: 11px; }
+  .graph-legend { flex-wrap: wrap; gap: 8px 14px; font-size: 9px; }
+  .suspect-big { max-width: 300px; }
+  .suspect-big figcaption strong { font-size: 26px; }
+
+  /* ask + evidence stack full-width */
+  .ask-wrap, .evidence-wrap { padding: 12px 14px; }
+  .ask-bar { flex-direction: column; }
+  .ask-bar .btn-primary { width: 100%; }
+  .pack { grid-template-columns: 1fr; }
+  .clue-actions { flex-wrap: wrap; }
+
+  /* landing poster */
+  .landing-nav { padding: 14px 16px; font-size: 10px; }
+  .poster { padding: 8px 14px 40px; }
+  .hero-poster { height: clamp(240px, 50vh, 440px); }
+  .hero-badge { right: 6px; top: 10px; }
+  .cta-row { flex-direction: column; width: 100%; max-width: 340px; }
+  .btn-cta, .btn-secure { width: 100%; text-align: center; }
+  .cast-member { width: 72px; }
+  .cast-member img { width: 56px; height: 56px; }
+
+  /* face-id gate */
+  .gate-wrap { margin: 16px auto; }
+  .gate-controls { flex-direction: column; align-items: stretch; }
+  .gate-controls input, .gate-controls .btn { width: 100%; }
+}
+
+@media (max-width: 400px) {
+  .t-hang { font-size: 42px; }
+  .t-berlin { font-size: 60px; }
+  .poster-tag { font-size: 13px; }
+}

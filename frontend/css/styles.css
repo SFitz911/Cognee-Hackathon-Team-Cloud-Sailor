@@ -352,6 +352,25 @@ textarea:focus, input:focus, select:focus {
 .btn-secure:hover { background: rgba(56,225,214,0.16); box-shadow: 0 6px 24px rgba(56,225,214,0.25); }
 .poster-foot { margin-top: 18px; font-size: 12px; color: var(--ink-faint); }
 .poster-foot b { color: var(--magenta); }
+
+/* ---- THE MISSION (page 1 intro) ---- */
+.mission { max-width: 900px; margin: 0 auto; padding: 20px 22px 70px; text-align: center; position: relative; z-index: 2; }
+.mission-title { font-family: "Anton", sans-serif; font-size: clamp(28px, 5vw, 48px); letter-spacing: 2px; color: #fff; margin: 10px 0 12px; }
+.mission-lead { font-size: clamp(14px, 1.7vw, 18px); line-height: 1.65; color: var(--ink-dim); max-width: 680px; margin: 0 auto 10px; }
+.mission-lead b { color: var(--ink); }
+.mission-sub { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 3px; color: var(--rust); margin: 34px 0 16px; }
+.who-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 640px) { .who-grid { grid-template-columns: repeat(2, 1fr); } }
+.who { margin: 0; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.who img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; }
+.who figcaption { padding: 10px 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+.who figcaption b { font-size: 13px; color: var(--ink); }
+.who figcaption span { font-size: 10.5px; color: var(--ink-faint); line-height: 1.3; }
+.mission-steps { list-style: none; margin: 0 auto; padding: 0; max-width: 620px; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+.mission-steps li { display: flex; gap: 12px; align-items: flex-start; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; color: var(--ink-dim); }
+.mission-steps li b { color: var(--ink); }
+.ms-n { flex: 0 0 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #150a10; background: linear-gradient(135deg, var(--magenta), var(--rust)); }
+.mission-cta { display: inline-block; margin-top: 30px; }
 .confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .confetti::before, .confetti::after {
   content: ""; position: absolute; inset: -20% 0 0 0;
@@ -372,6 +391,7 @@ textarea:focus, input:focus, select:focus {
    ============================================================ */
 .btn-back { background: #241d2e; color: var(--ink); font-size: 12px; padding: 8px 14px; margin-right: 6px; }
 .btn-back:hover { background: #2e2539; }
+.btn-next { font-size: 12px; padding: 8px 16px; letter-spacing: .5px; }
 .stage {
   max-width: 860px; margin: 28px auto 10px; padding: 0 20px;
   display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -486,6 +506,50 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
 .gate-meta .ok { color: var(--optimist); }
 .gate-meta .bad { color: var(--wildcard); }
 
+/* ---- PAGE 3 access (story + code + face) ---- */
+.access-wrap { max-width: 900px; margin: 0 auto; padding: 24px 20px 70px; }
+.access-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; margin-bottom: 28px; }
+@media (max-width: 720px) { .access-row { grid-template-columns: 1fr; } }
+.story-vid { margin: 0; }
+.story-vid video { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: #000; display: block; }
+.story-vid figcaption { font-size: 12.5px; color: var(--ink-dim); margin-top: 8px; }
+.founder-chat { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.fc-head { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-dim); }
+.fc-head img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cyan); }
+.fc-head b { color: var(--cyan); }
+#fc-vid { width: 100%; border-radius: 10px; background: #000; aspect-ratio: 1/1; object-fit: cover; }
+.fc-line { font-size: 14px; color: var(--ink); font-style: italic; min-height: 20px; }
+.access-step { max-width: 640px; margin: 0 auto 30px; text-align: center; }
+.access-h { font-family: "Bebas Neue", sans-serif; letter-spacing: 2px; font-size: 22px; color: var(--ink); margin: 0 0 12px; }
+.demo-vid { width: 100%; max-width: 520px; border-radius: 14px; border: 1px solid var(--line); background: #000; }
+.code-entry { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.code-entry input {
+  width: 200px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 24px;
+  letter-spacing: 8px; padding: 12px; background: #0c0a11; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px;
+}
+.code-entry input:focus { outline: none; border-color: var(--magenta); box-shadow: 0 0 0 3px rgba(255,61,139,0.15); }
+.access-msg { margin-top: 10px; font-size: 13px; min-height: 18px; }
+.access-msg.ok { color: var(--optimist); }
+.access-msg.bad { color: var(--wildcard); }
+.access-final { text-align: center; margin-top: 10px; }
+.access-checks { display: flex; gap: 18px; justify-content: center; margin-bottom: 14px; font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--ink-faint); }
+.chk.ok { color: var(--optimist); }
+
+/* ---- PAGE 4 success (dog-show win) ---- */
+.success { position: relative; }
+.success-wrap { max-width: 760px; margin: 0 auto; padding: 30px 20px 70px; text-align: center; position: relative; z-index: 2; }
+.success-title { font-family: "Anton", sans-serif; font-size: clamp(38px, 8vw, 84px); letter-spacing: 2px; margin: 8px 0 14px;
+  background: linear-gradient(180deg, #ffd76a, var(--rust)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255,180,60,0.4)); }
+.success-lead { font-size: clamp(14px, 1.8vw, 18px); line-height: 1.65; color: var(--ink-dim); max-width: 620px; margin: 0 auto 22px; }
+.success-lead b { color: var(--ink); }
+.win-vid { margin: 0 0 22px; }
+.win-vid video { width: 100%; border-radius: 16px; border: 1px solid rgba(255,180,60,0.4); background: #000; box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 50px rgba(255,180,60,0.18); display: block; }
+.win-vid figcaption { margin-top: 10px; font-size: 13px; color: var(--ink-dim); }
+.success-foot { font-size: 14px; color: var(--ink-dim); margin: 0 auto 24px; max-width: 560px; }
+.success-foot b { color: var(--magenta); }
+
 @keyframes scanmove { 0%,100% { top: 12%; } 50% { top: 86%; } }
 
 /* ============================================================
@@ -516,6 +580,21 @@ iframe.explorer-graph { background: #fff; }
   .explorer-bar { flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
   .explorer-hint { display: none; }
 }
+
+/* Cognee explainer overlay (page 5) */
+.about-overlay { position: fixed; inset: 0; z-index: 1000; display: none; place-items: center;
+  background: rgba(6,5,10,0.82); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 20px; }
+.about-overlay.show { display: grid; }
+.about-card { position: relative; width: min(620px, 94vw); max-height: 88vh; overflow: auto;
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2)); border: 1px solid rgba(255,61,139,0.4);
+  border-radius: 18px; padding: 26px 26px 24px; box-shadow: 0 30px 90px rgba(0,0,0,0.7); }
+.about-title { font-family: "Anton", sans-serif; font-size: clamp(28px, 5vw, 44px); margin: 8px 0 14px; color: #fff; }
+.c-magenta { color: var(--magenta); }
+.about-p { font-size: 14.5px; line-height: 1.6; color: var(--ink-dim); margin: 0 0 12px; }
+.about-p b { color: var(--ink); }
+.about-feats { list-style: none; margin: 14px 0 20px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.about-feats li { font-size: 13.5px; color: var(--ink-dim); background: #0e0c13; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.about-feats b { color: var(--cyan); }
 
 /* ============================================================
    MOBILE / RESPONSIVE (phones, iPhone-friendly)

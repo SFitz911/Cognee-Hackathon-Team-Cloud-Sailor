@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Security — Wolfpack Recall</title>
+  <title>Access the Gym — Wolfpack Recall</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -12,45 +12,69 @@
 <body>
   <div class="grain" aria-hidden="true"></div>
 
-  <section class="view gate">
+  <section class="view access">
     <header class="topbar">
-      <a href="/" class="btn btn-back">← poster</a>
-      <div class="brand">
-        <span class="brand-mark">WOLFPACK</span>
-        <span class="brand-sub">RECALL</span>
-      </div>
+      <a href="/investigate.html" class="btn btn-back">← investigation</a>
+      <div class="brand"><span class="brand-mark">ACCESS</span><span class="brand-sub">THE GYM</span></div>
       <div class="case-banner">
-        <span class="case-label">SECURITY CHECKPOINT</span>
-        <span class="case-title">Facial recognition required to access the memory database</span>
+        <span class="case-label">STEP 3 OF 5</span>
+        <span class="case-title">Recover the code, then prove it's you</span>
       </div>
-      <div class="status" id="status">
-        <span class="dot" id="status-dot"></span>
-        <span id="status-text">checking scanner…</span>
-      </div>
+      <div class="status" id="status"><span class="dot" id="status-dot"></span><span id="status-text">checking scanner…</span></div>
     </header>
 
-    <div class="gate-wrap">
-      <h1 class="gate-title">IDENTITY CHECK</h1>
-      <p class="gate-sub">Only enrolled members of the Wolfpack may open the database. Look into the camera.</p>
-
-      <div class="scanner" id="scanner">
-        <video id="video" autoplay playsinline muted></video>
-        <div class="scan-line" id="scan-line"></div>
-        <div class="scan-frame"></div>
-        <div class="scan-verdict" id="verdict"></div>
-      </div>
-      <canvas id="canvas" class="hidden"></canvas>
-
-      <div class="gate-controls">
-        <button id="start-cam" class="btn btn-ghost">◉ Start camera</button>
-        <input id="op-name" type="text" placeholder="operative name (for enroll)" />
-        <button id="enroll" class="btn btn-ghost" disabled>+ Enroll my face</button>
-        <button id="scan" class="btn btn-primary" disabled>🔓 SCAN TO ENTER</button>
+    <div class="access-wrap">
+      <!-- reunion + founder chat -->
+      <div class="access-row">
+        <figure class="story-vid">
+          <video src="/media/clips/reunion_code.mp4" controls playsinline preload="metadata"></video>
+          <figcaption>🐕 Pinky stands up — the locker code is tattooed on her belly.</figcaption>
+        </figure>
+        <div class="founder-chat">
+          <div class="fc-head"><img src="/images/Founder.png" alt="Founder" /><span><b>The Founder</b> · Chow mode</span></div>
+          <video id="fc-vid" src="/media/clips/founder_data.mp4" muted loop playsinline preload="metadata"></video>
+          <div class="fc-line" id="fc-line">"Where is your data at, bro?!"</div>
+          <button id="fc-say" class="btn btn-ghost" type="button">🎲 Chow says…</button>
+        </div>
       </div>
 
-      <div class="gate-meta">
-        <span id="enrolled-info">enrolled: —</span>
-        <span id="gate-msg"></span>
+      <!-- STEP 1 — enter the code -->
+      <div class="access-step">
+        <h3 class="access-h">① ENTER THE LOCKER CODE</h3>
+        <video class="demo-vid" src="/media/clips/code_to_gym.mp4" controls playsinline preload="metadata"></video>
+        <div class="code-entry">
+          <input id="code-input" inputmode="numeric" maxlength="7" placeholder="•••••••" autocomplete="off" />
+          <button id="code-check" class="btn btn-primary" type="button">Unlock</button>
+        </div>
+        <div id="code-msg" class="access-msg"></div>
+      </div>
+
+      <!-- STEP 2 — scan your face -->
+      <div class="access-step" id="face-step">
+        <h3 class="access-h">② SCAN YOUR FACE</h3>
+        <div class="scanner" id="scanner">
+          <video id="video" autoplay playsinline muted></video>
+          <div class="scan-line" id="scan-line"></div>
+          <div class="scan-frame"></div>
+          <div class="scan-verdict" id="verdict"></div>
+        </div>
+        <canvas id="canvas" class="hidden"></canvas>
+        <div class="gate-controls">
+          <button id="start-cam" class="btn btn-ghost" type="button">◉ Start camera</button>
+          <input id="op-name" type="text" placeholder="operative name (for enroll)" />
+          <button id="enroll" class="btn btn-ghost" type="button" disabled>+ Enroll my face</button>
+          <button id="scan" class="btn btn-primary" type="button" disabled>🔓 Scan</button>
+        </div>
+        <div class="gate-meta"><span id="enrolled-info">enrolled: —</span><span id="gate-msg"></span></div>
+      </div>
+
+      <!-- unlock -->
+      <div class="access-final">
+        <div class="access-checks">
+          <span id="chk-code" class="chk">○ code</span>
+          <span id="chk-face" class="chk">○ face</span>
+        </div>
+        <a id="enter-gym" class="btn btn-cta" href="/success.html">▶ ENTER THE GYM</a>
       </div>
     </div>
   </section>

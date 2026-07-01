@@ -20,6 +20,11 @@ media/posters/*
 !media/clips/founder_talk_*.mp4
 !media/clips/founder_say_*.mp4
 !media/clips/founder_say_manifest.json
+# Story videos for the narrative pages ARE committed.
+!media/clips/winning_dogshow.mp4
+!media/clips/reunion_code.mp4
+!media/clips/code_to_gym.mp4
+!media/clips/founder_data.mp4
 # Chow cameo audio IS committed so the cameo works on the cloud deploy.
 !media/audio/chow_*.mp3
 !media/audio/chow_manifest.json

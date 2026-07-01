@@ -38,6 +38,7 @@
         <span>dataset</span>
         <select id="ds-select"></select>
       </label>
+      <button id="about-btn" class="gtab" type="button">ℹ️ About Cognee</button>
       <span class="explorer-hint" id="explorer-hint"></span>
     </div>
 
@@ -45,6 +46,34 @@
     <div class="explorer-stage">
       <iframe id="brain-frame" class="explorer-graph" title="Cognee knowledge graph" loading="lazy"></iframe>
       <div id="graph" class="explorer-graph hidden"></div>
+    </div>
+
+    <!-- Cognee explainer overlay -->
+    <div id="about-overlay" class="about-overlay">
+      <div class="about-card">
+        <button id="about-close" class="cameo-close" type="button" aria-label="Close">✕</button>
+        <span class="poster-credits">THE MEMORY BEHIND THE MISSION</span>
+        <h2 class="about-title">This is <span class="c-magenta">Cognee</span>.</h2>
+        <p class="about-p">
+          Everything you just did — every clue, character, location and code — was stored as a
+          <b>knowledge graph</b> in <b>Cognee Cloud</b>. Cognee is an <b>AI memory layer</b>: it
+          ingests raw text, builds a hybrid <b>vector + graph</b> memory, grounds entities into an
+          ontology, and lets AI agents <b>recall connected facts across sessions</b>.
+        </p>
+        <p class="about-p">
+          That's how the four AI minds reconstructed a night nobody remembered — and how they
+          debunked the false leads. The graph behind this card is the <b>real</b> memory Cognee
+          built for this case (not a mockup). Use the <b>dataset</b> picker to explore other
+          memories, like <b>Mr. Chow's</b> personality graph.
+        </p>
+        <ul class="about-feats">
+          <li>🧩 <b>remember / recall</b> — persistent long-term memory for agents</li>
+          <li>🕸️ <b>GRAPH_COMPLETION</b> — fuses every clue into one grounded answer</li>
+          <li>🧠 <b>ontology + datasets + node_sets</b> — typed, filterable memory</li>
+          <li>🔌 <b>MCP + integrations</b> — one memory, many agents</li>
+        </ul>
+        <button id="about-explore" class="btn btn-cta" type="button">Explore the graph →</button>
+      </div>
     </div>
   </section>
 

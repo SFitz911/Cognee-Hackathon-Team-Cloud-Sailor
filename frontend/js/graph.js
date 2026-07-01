@@ -104,6 +104,15 @@ function showView(which) {
 document.getElementById("tab-map").addEventListener("click", () => showView("map"));
 document.getElementById("tab-brain").addEventListener("click", () => showView("brain"));
 
+/* ---- Cognee explainer overlay (shows on first arrival) ---- */
+const aboutOverlay = document.getElementById("about-overlay");
+function showAbout(on) { aboutOverlay.classList.toggle("show", on); }
+document.getElementById("about-btn").addEventListener("click", () => showAbout(true));
+document.getElementById("about-close").addEventListener("click", () => showAbout(false));
+document.getElementById("about-explore").addEventListener("click", () => showAbout(false));
+aboutOverlay.addEventListener("click", (e) => { if (e.target === aboutOverlay) showAbout(false); });
+showAbout(true);
+
 loadDatasets();
 showView("brain");   // default to Cognee Brain first
 refreshStatus();

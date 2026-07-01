@@ -2,6 +2,47 @@
    Flow: start camera -> (enroll your face) -> scan to enter -> unlock the database. */
 
 let stream = null;
+let codeOK = false;
+let faceOK = false;
+let chowClips = null;
+const GYM_CODE = "8675309";
+
+/* Gate: reveal ENTER THE GYM only when the code is right AND the face passed. */
+function updateGate() {
+  const cc = $("#chk-code"), cf = $("#chk-face"), enter = $("#enter-gym");
+  cc.textContent = (codeOK ? "● " : "○ ") + "code";
+  cf.textContent = (faceOK ? "● " : "○ ") + "face";
+  cc.classList.toggle("ok", codeOK);
+  cf.classList.toggle("ok", faceOK);
+  enter.classList.toggle("hidden", !(codeOK && faceOK));
+}
+
+function checkCode() {
+  const val = ($("#code-input").value || "").replace(/\D/g, "");
+  const msg = $("#code-msg");
+  if (val === GYM_CODE) {
+    codeOK = true;
+    msg.textContent = "✓ Locker opens — Pinky's code checks out.";
+    msg.className = "access-msg ok";
+  } else {
+    codeOK = false;
+    msg.textContent = "✗ Wrong code. Look at Pinky's belly again…";
+    msg.className = "access-msg bad";
+  }
+  updateGate();
+}
+
+/* Founder chat — Chow drops a random line + talks. */
+async function chowSays() {
+  const line = $("#fc-line"), vid = $("#fc-vid");
+  try { vid.play().catch(() => {}); } catch {}
+  if (!chowClips) { try { chowClips = await fetch("/media/audio/chow_manifest.json").then((r) => r.json()); } catch { chowClips = []; } }
+  if (chowClips.length) {
+    const c = chowClips[Math.floor(Math.random() * chowClips.length)];
+    line.textContent = "“" + c.text + "”";
+    try { new Audio(c.file).play().catch(() => {}); } catch {}
+  }
+}
 
 async function refreshAuthStatus() {
   const dot = $("#status-dot");
@@ -139,10 +180,11 @@ async function scanToEnter() {
     });
     if (r.detail) { setMsg(r.detail, "bad"); showVerdict("✗ " + r.detail, false); return; }
     if (r.granted) {
-      showVerdict(`✓ ACCESS GRANTED — ${r.identity}`, true);
-      setMsg(`Welcome back, ${r.identity}. Opening the database…`, "ok");
+      showVerdict(`✓ FACE VERIFIED — ${r.identity}`, true);
+      setMsg(`Welcome, ${r.identity}. ${codeOK ? "The gym is open — go win!" : "Now enter the locker code."}`, "ok");
       sessionStorage.setItem("wolfpack_access", "granted");
-      setTimeout(() => { window.location.href = "/investigate.html"; }, 1500);
+      faceOK = true;
+      updateGate();
     } else {
       showVerdict("✗ ACCESS DENIED", false);
       setMsg(`${r.reason}${r.distance != null ? ` (distance ${r.distance})` : ""}`, "bad");
@@ -158,7 +200,12 @@ async function scanToEnter() {
 $("#start-cam").addEventListener("click", startCamera);
 $("#enroll").addEventListener("click", enrollFace);
 $("#scan").addEventListener("click", scanToEnter);
+$("#code-check").addEventListener("click", checkCode);
+$("#code-input").addEventListener("keydown", (e) => { if (e.key === "Enter") checkCode(); });
+$("#fc-say").addEventListener("click", chowSays);
 
+$("#enter-gym").classList.add("hidden");
+updateGate();
 refreshAuthStatus();
 setInterval(refreshAuthStatus, 8000);
 

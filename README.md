@@ -95,6 +95,34 @@ edge-tts, DeepFace, Puter) so the app is reproducible and cheap, and reserved pa
 
 ---
 
+## 🔐 What actually happens during the face scan (Page 3)
+
+The Access page uses **real facial recognition**, not a gimmick — and it's worth
+knowing exactly what it does (and doesn't) do:
+
+1. **Capture** — your browser grabs a single webcam frame locally and sends it to
+   our own backend (over HTTPS). It is **never sent to any third-party face API**.
+2. **Detect** — the server runs **open-source [DeepFace](https://github.com/serengil/deepface)**
+   with an **OpenCV** detector to find a face in the frame. On **enroll** we reject
+   the photo if no clear face is found, so you don't get saved with a bad reference.
+3. **Embed & match** — the **SFace** neural network turns the face into a numeric
+   embedding (a "faceprint") and compares it to the enrolled gallery by distance.
+   Under the model's threshold → **access granted**; over it → **denied**.
+4. **Storage** — the reference image lives only in the app's local `media/faces/`
+   folder (git-ignored PII). Your face is **not** stored in Cognee or any database.
+
+**Why it sometimes takes a second:** the delay is the **open-source DeepFace model
+computing locally** — and the **first** scan is slowest because the model weights
+load into memory. **It is *not* a Cognee/database lookup** (Cognee stores the *case*
+memory — clues, characters, locations — never faces). After the first scan it's quick.
+
+**Getting a clean match:** look straight at the camera, keep your head level (don't
+tilt or turn), **remove glasses/hats**, and use good, even lighting so your face
+fills the frame. Glasses, sharp angles, or backlighting are the usual reasons a scan
+is denied — the app now tells you this on screen when a face can't be read.
+
+---
+
 ## 🛠️ Techniques & engineering
 
 - **Multi-agent reasoning** — four distinct Claude personas (Planner / Wildcard / Worrier /

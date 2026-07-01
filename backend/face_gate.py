@@ -79,14 +79,42 @@ def _clear_cache() -> None:
             pkl.unlink(missing_ok=True)
 
 
+# Shown whenever a face can't be detected — same advice for enroll and verify.
+FACE_TIPS = (
+    "Look straight at the camera, keep your head level (don't tilt or turn), "
+    "remove glasses/hat, and make sure your face is well-lit and fills the frame."
+)
+
+
+def _face_detectable(img) -> bool:
+    """True if DeepFace can find exactly one clear face in the frame."""
+    try:
+        from deepface import DeepFace
+
+        faces = DeepFace.extract_faces(
+            img_path=img,
+            detector_backend=DETECTOR,
+            enforce_detection=True,
+        )
+        return bool(faces)
+    except Exception:  # noqa: BLE001 — ValueError = no face; any failure => not detectable
+        return False
+
+
 def enroll(name: str, data_url: str) -> str:
-    """Save a webcam frame as an authorized face. Returns the stored file name."""
+    """Save a webcam frame as an authorized face. Returns the stored file name.
+
+    Rejects frames where no clear face is found so users aren't enrolled with a
+    bad reference photo (a common cause of later "access denied").
+    """
     import cv2
 
     if not is_available():
         raise FaceGateError("DeepFace/OpenCV not installed yet.")
-    safe = "".join(c for c in name.strip() if c.isalnum() or c in ("-", "_")) or "operative"
     img = _decode_dataurl(data_url)
+    if not _face_detectable(img):
+        raise FaceGateError(f"No clear face detected. {FACE_TIPS}")
+    safe = "".join(c for c in name.strip() if c.isalnum() or c in ("-", "_")) or "operative"
     GALLERY.mkdir(parents=True, exist_ok=True)
     out = GALLERY / f"{safe}.jpg"
     if not cv2.imwrite(str(out), img):
@@ -116,7 +144,7 @@ def verify(data_url: str) -> VerifyResult:
         )
     except ValueError as e:
         # DeepFace raises ValueError when it can't detect a face.
-        return VerifyResult(False, None, None, None, "No face detected — look at the camera.")
+        return VerifyResult(False, None, None, None, f"No face detected. {FACE_TIPS}")
 
     # results is a list of DataFrames (one per detected face); take the best row.
     best = None
@@ -137,5 +165,5 @@ def verify(data_url: str) -> VerifyResult:
         identity=name if granted else None,
         distance=round(distance, 4),
         threshold=round(threshold, 4) if threshold else None,
-        reason="Access granted." if granted else "Face not recognized.",
+        reason="Access granted." if granted else f"Face not recognized. {FACE_TIPS}",
     )

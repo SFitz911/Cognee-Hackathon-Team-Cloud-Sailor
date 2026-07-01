@@ -182,7 +182,7 @@ function showVerdict(text, ok) {
 async function enrollFace() {
   const img = captureFrame();
   if (!img) return setMsg("Camera not ready yet.", "bad");
-  setMsg("Enrolling…");
+  setMsg("Enrolling… (running the open-source DeepFace model — first run loads it)");
   scanning(true);
   try {
     const r = await api("/auth/enroll", {
@@ -203,7 +203,7 @@ async function enrollFace() {
 async function scanToEnter() {
   const img = captureFrame();
   if (!img) return setMsg("Camera not ready yet.", "bad");
-  setMsg("Scanning…");
+  setMsg("Scanning… (DeepFace model computing locally — not a database call; first scan is slowest)");
   scanning(true);
   $("#scan").disabled = true;
   try {

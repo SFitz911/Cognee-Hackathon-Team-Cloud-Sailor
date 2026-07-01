@@ -70,6 +70,20 @@
           <button id="scan" class="btn btn-primary" type="button" disabled>🔓 Scan</button>
         </div>
         <div class="gate-meta"><span id="enrolled-info">enrolled: —</span><span id="gate-msg"></span></div>
+        <p class="scan-tips">
+          👓 <b>Best results:</b> look straight at the camera, keep your head level,
+          <b>remove glasses/hat</b>, and use good lighting. Enroll once, then scan.
+        </p>
+        <details class="scan-why">
+          <summary>Why does the scan take a moment?</summary>
+          <p>
+            The match runs <b>100% on the server using open-source <b>DeepFace</b>
+            (SFace + OpenCV)</b> — real neural-network face recognition, no third-party
+            face API. The first scan is slowest because the model loads into memory;
+            after that it's quick. <b>This delay is the open-source model computing —
+            it is <i>not</i> a database/Cognee lookup.</b> Your face never leaves this app.
+          </p>
+        </details>
       </div>
 
       <!-- unlock -->

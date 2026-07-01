@@ -116,6 +116,32 @@ computing locally** — and the **first** scan is slowest because the model weig
 load into memory. **It is *not* a Cognee/database lookup** (Cognee stores the *case*
 memory — clues, characters, locations — never faces). After the first scan it's quick.
 
+### The slow-first-scan bug — how we found it and fixed it
+
+**Symptom.** During testing the *first* face scan after a fresh deploy took several
+seconds, which felt like the app was "calling out" to a slow service.
+
+**Diagnosis.** We traced the request path and confirmed the face gate makes **zero
+network calls** — no HuggingFace, no fal.ai, no Cognee, no database. So the time was
+pure server-side compute on Render. It broke down into three parts:
+1. **Render cold start** — if the instance had spun down while idle, the request first
+   waits for the container to wake (this is a hosting-tier behaviour, not our code).
+2. **First-scan model load** — even though the SFace weights are **pre-baked into the
+   Docker image** at build time, TensorFlow + the model still had to load into RAM the
+   *first* time a scan ran after each restart. This was the dominant, fixable cost.
+3. **CPU inference** — Render has no GPU, so each match is a couple seconds of CPU work.
+
+**Fix.** On server **startup** we now preload the SFace model in a background thread
+(`face_gate.warm_up()` fired from a FastAPI startup event), so the heavy one-time load
+happens at boot instead of on the first user's scan. `GET /auth/status` reports a
+`warm` flag, and the Access page shows **"warming up the model…"** → **"scanner ready —
+fast scans"** so users know the state. We also **pre-download the weights in the
+Dockerfile** so nothing is fetched at runtime.
+
+**Remaining caveat.** On a hosting tier that lets the instance sleep when idle, the
+very first request after a sleep still pays the container wake-up (Render cold start).
+Keeping the instance always-on removes that; the model warm-up above removes the rest.
+
 **Getting a clean match:** look straight at the camera, keep your head level (don't
 tilt or turn), **remove glasses/hats**, and use good, even lighting so your face
 fills the frame. Glasses, sharp angles, or backlighting are the usual reasons a scan

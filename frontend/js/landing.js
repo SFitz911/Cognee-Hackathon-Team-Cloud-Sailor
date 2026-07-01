@@ -25,3 +25,12 @@ function renderCast() {
 }
 
 renderCast();
+
+/* Warm the backend the moment the poster loads: this wakes a sleeping Render
+   instance and triggers the DeepFace model warm-up early, so by the time the
+   visitor reaches Page 3 the face scanner is already fast. Fire-and-forget. */
+(function prewarmBackend() {
+  const ping = (path) => { try { fetch(path, { cache: "no-store" }).catch(() => {}); } catch {} };
+  ping("/health");
+  ping("/auth/status");   // touches face_gate → kicks off model warm-up
+})();

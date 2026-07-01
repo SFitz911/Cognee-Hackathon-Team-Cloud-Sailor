@@ -168,7 +168,6 @@ async function openCameo(kind = "intro") {
     };
     another.addEventListener("click", () => { try { loopVid.pause(); } catch {} playSeq([pickSayFrom(say)]); });
     playSeq(shuffled(say).slice(0, 3));
-    if (openCount >= 2) fetch(CAMEO.generateUrl, { method: "POST" }).catch(() => {});
     return;
   }
 
@@ -199,7 +198,6 @@ async function openCameo(kind = "intro") {
   };
   another.addEventListener("click", () => { try { audio.pause(); } catch {} if (CLIPS.length) playClips(pickClips("any", 1)); else speakFallback([CHOW_FALLBACK[Math.floor(Math.random() * CHOW_FALLBACK.length)]]); });
   if (CLIPS.length) playClips(pickClips(kind, 3)); else speakFallback(CHOW_FALLBACK);
-  if (openCount >= 2) fetch(CAMEO.generateUrl, { method: "POST" }).catch(() => {});
 }
 
 if (window.speechSynthesis) window.speechSynthesis.getVoices();

@@ -174,10 +174,10 @@ def cameo_videos() -> dict:
 
 @app.post("/cameo/videos/generate")
 def cameo_videos_generate() -> dict:
-    """Kick off ONE background generation to grow the pool (latency-hiding)."""
+    """Disabled: on-demand video generation is turned off (uses a committed,
+    static pool only). Kept as a no-op so any stray call is harmless."""
     from . import video_gen
-    started = video_gen.generate_async()
-    return {"started": started, "count": len(video_gen.list_videos())}
+    return {"started": False, "disabled": True, "count": len(video_gen.list_videos())}
 
 
 @app.get("/cognee/datasets")

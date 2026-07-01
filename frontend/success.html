@@ -34,7 +34,10 @@
       </p>
 
       <figure class="win-vid">
-        <video src="/media/clips/winning_dogshow.mp4" controls autoplay muted playsinline preload="metadata"></video>
+        <div class="win-media">
+          <video id="win-video" src="/media/clips/winning_dogshow.mp4" controls autoplay muted playsinline preload="metadata"></video>
+          <div class="win-banner" id="win-banner">🏆 AND THE WINNER IS…<br /><b>PINKY!</b> 🏆</div>
+        </div>
         <figcaption>🥇 Pinky takes Best in Show at Sremski Karlovci.</figcaption>
       </figure>
 
@@ -52,5 +55,18 @@
   </section>
 
   <script src="/js/common.js"></script>
+  <script>
+    // Reveal the "You're the winner" banner near the end of the clip (and on end).
+    (function () {
+      var v = document.getElementById("win-video");
+      var b = document.getElementById("win-banner");
+      if (!v || !b) return;
+      var show = function () { b.classList.add("show"); };
+      v.addEventListener("timeupdate", function () {
+        if (v.duration && v.currentTime >= v.duration - 1.6) show();
+      });
+      v.addEventListener("ended", show);
+    })();
+  </script>
 </body>
 </html>

@@ -193,6 +193,7 @@ async function askSend(question) {
 }
 
 document.getElementById("ask-toggle").addEventListener("click", () => openAsk(true));
+document.getElementById("ask-btn-top").addEventListener("click", () => openAsk(true));
 document.getElementById("ask-min").addEventListener("click", () => openAsk(false));
 document.getElementById("ask-form").addEventListener("submit", (e) => {
   e.preventDefault();

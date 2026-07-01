@@ -553,8 +553,18 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
 .success-lead { font-size: clamp(14px, 1.8vw, 18px); line-height: 1.65; color: var(--ink-dim); max-width: 620px; margin: 0 auto 22px; }
 .success-lead b { color: var(--ink); }
 .win-vid { margin: 0 0 22px; }
-.win-vid video { width: 100%; border-radius: 16px; border: 1px solid rgba(255,180,60,0.4); background: #000; box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 50px rgba(255,180,60,0.18); display: block; }
+.win-media { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,180,60,0.4); box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 50px rgba(255,180,60,0.18); }
+.win-media video { width: 100%; background: #000; display: block; }
+.win-banner {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  font-family: "Anton", sans-serif; font-size: clamp(26px, 6vw, 56px); line-height: 1.05; letter-spacing: 1px;
+  color: #fff; background: rgba(6,5,10,0.55); opacity: 0; pointer-events: none; transition: opacity .5s var(--ease);
+  text-shadow: 0 0 26px rgba(255,180,60,0.7);
+}
+.win-banner b { color: #ffd76a; font-size: 1.35em; }
+.win-banner.show { opacity: 1; animation: winPop .6s var(--ease); }
 .win-vid figcaption { margin-top: 10px; font-size: 13px; color: var(--ink-dim); }
+@keyframes winPop { 0% { transform: scale(0.85); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
 .success-foot { font-size: 14px; color: var(--ink-dim); margin: 0 auto 24px; max-width: 560px; }
 .success-foot b { color: var(--magenta); }
 

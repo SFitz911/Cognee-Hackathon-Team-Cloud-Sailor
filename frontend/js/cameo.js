@@ -153,7 +153,10 @@ async function openCameo(kind = "intro") {
 
   // ---------- LIP-SYNC MODE (real synced video, audio baked in) ----------
   if (lip) {
-    analyser = makeAnalyser(loopVid);        // bars react to the video's audio
+    // IMPORTANT: play the video's audio NORMALLY (unmuted) — do NOT route it
+    // through Web Audio, which desyncs/mutes it. The voice is baked in and
+    // already matches the lips. Bars animate on a simple timer (analyser=null).
+    analyser = null;
     face.classList.add("hidden");
     loopVid.classList.remove("hidden");
     loopVid.muted = false; loopVid.loop = false;
@@ -165,14 +168,16 @@ async function openCameo(kind = "intro") {
         const clip = clips[i++];
         sub.textContent = clip.text;
         loopVid.src = clip.file;
+        loopVid.currentTime = 0;
         loopVid.play().then(startSpeaking).catch(next);
         loopVid.onended = next;
         loopVid.onerror = next;
       };
       next();
     };
+    // Play 2 distinct random clips so it's never "the same loop".
     another.addEventListener("click", () => { try { loopVid.pause(); } catch {} playSeq([pickSayFrom(say)]); });
-    playSeq(shuffled(say).slice(0, 3));
+    playSeq(shuffled(say).slice(0, 2));
     return;
   }
 

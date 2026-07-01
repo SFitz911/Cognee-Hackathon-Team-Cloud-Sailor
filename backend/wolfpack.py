@@ -22,7 +22,7 @@ from .personalities import WOLFPACK, Persona
 
 # Claude model for the personas. Opus 4.x per project guidance; override via env.
 DEFAULT_MODEL = os.getenv("WOLFPACK_MODEL", "claude-opus-4-8")
-MAX_TOKENS = 320  # personas speak in short punchy paragraphs
+MAX_TOKENS = 90  # personas speak in ONE short sentence
 
 
 @dataclass(frozen=True)
@@ -179,12 +179,12 @@ class Wolfpack:
             "established case memory, judge whether a new statement is TRUE (supported by or "
             "consistent with the memory), FALSE (contradicted by the memory), or UNKNOWN "
             "(no evidence either way). Reply with exactly one word — TRUE, FALSE, or UNKNOWN — "
-            "then a dash and one short sentence of justification grounded in the clues."
+            "then a dash and a VERY short reason of at most 8 words."
         )
         user = f"CASE MEMORY:\n{context}\n\nSTATEMENT TO CHECK:\n{statement}"
         kwargs: dict = {
             "model": self.model,
-            "max_tokens": 120,
+            "max_tokens": 40,
             "system": system,
             "messages": [{"role": "user", "content": user}],
         }

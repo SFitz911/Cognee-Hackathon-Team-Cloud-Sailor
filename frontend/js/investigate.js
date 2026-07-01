@@ -24,8 +24,9 @@ function renderClues() {
   for (const c of clues.slice().reverse()) {
     const li = document.createElement("li");
     li.className = `${c.node_set} verdict-${c.verdict}`;
+    const label = { true: "TRUE", false: "FALSE", checking: "…", unknown: "?" }[c.verdict] || "";
     li.innerHTML = `
-      <span class="tag">${c.node_set} · ${c.state}${c.verdict !== "pending" ? " · " + c.verdict.toUpperCase() : ""}</span>
+      <span class="tag"><i class="clue-dot dot-${c.verdict}"></i>${c.node_set}${label ? " · " + label : ""}</span>
       <span class="clue-body">${escapeHtml(c.text)}</span>
       ${c.reason ? `<span class="clue-reason">↳ ${escapeHtml(c.reason)}</span>` : ""}
       <span class="clue-actions">

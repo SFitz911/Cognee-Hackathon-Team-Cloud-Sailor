@@ -497,6 +497,7 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
   position: relative; width: min(440px, 86vw); aspect-ratio: 4/3; border-radius: 16px;
   overflow: hidden; background: #050409; border: 1px solid var(--line);
   box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  margin: 0 auto;   /* center the box in the page flow (text-align can't center a block) */
 }
 .scanner video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: contrast(1.05) saturate(1.05); }
 .scan-frame {

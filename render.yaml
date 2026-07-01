@@ -1,0 +1,27 @@
+# Render Blueprint — Wolfpack Recall (Hangover 4: Berlin)
+# Deploy: push to GitHub, then Render Dashboard -> New -> Blueprint -> pick this repo.
+# Set the four secret env vars (sync:false) in the dashboard after creation.
+services:
+  - type: web
+    name: wolfpack-recall
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: uvicorn backend.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: COGNEE_DATASET
+        value: pinky_serbia
+      # --- secrets: set these in the Render dashboard (not committed) ---
+      - key: COGNEE_BASE_URL
+        sync: false
+      - key: COGNEE_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

@@ -1,0 +1,11 @@
+# Lean web dependencies for cloud deploy (Render).
+# Excludes DeepFace/TensorFlow (Page 3 Face ID) and poster tooling, which are
+# heavy and local-only. The face gate degrades gracefully in the cloud
+# (/auth/status reports available:false). To enable Face ID in the cloud, deploy
+# with the full requirements.txt on an instance with >= 2 GB RAM.
+python-dotenv>=1.0
+fastapi>=0.110,<0.116
+starlette>=0.37,<0.39
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+anthropic>=0.39

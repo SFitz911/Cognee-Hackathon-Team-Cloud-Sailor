@@ -165,16 +165,34 @@ def cameo_lines(kind: str = "any", n: int = 1, max_len: int = 72) -> dict:
     return {"kind": kind, "lines": pool[:n]}
 
 
+@app.get("/cognee/datasets")
+def cognee_datasets() -> dict:
+    """List the datasets (memory graphs) on the tenant, for the graph explorer."""
+    client = get_cognee()
+    try:
+        _, rows = client._request("GET", "/api/v1/datasets", timeout=15)
+    except CogneeError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from e
+    import re
+    uuid_re = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-", re.I)
+    items = [
+        {"name": d.get("name"), "id": d.get("id") or d.get("dataset_id")}
+        for d in (rows or [])
+        if isinstance(d, dict) and d.get("name") and not uuid_re.match(str(d.get("name")))
+    ]
+    return {"default": client.dataset, "datasets": items}
+
+
 @app.get("/cognee/graph", response_class=HTMLResponse)
-def cognee_graph() -> HTMLResponse:
-    """Proxy Cognee Cloud's live knowledge-graph visualization for our dataset.
+def cognee_graph(dataset: Optional[str] = None) -> HTMLResponse:
+    """Proxy Cognee Cloud's live knowledge-graph visualization for a dataset.
 
     Served from our origin so the API key stays server-side and the page can be
     embedded in an iframe without hitting Cognee's X-Frame-Options.
     """
     client = get_cognee()
     try:
-        html = client.visualize_html()
+        html = client.visualize_html(dataset)
     except CogneeError as e:
         raise HTTPException(status_code=502, detail=str(e)) from e
     return HTMLResponse(content=html)

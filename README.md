@@ -14,8 +14,8 @@ is in **beta**, so a few things may look slightly off on small screens — but t
 end to end — hit **🕵️ Auto Detective** to solve the case in one click (or investigate
 manually), watch the founder talk (real lip-synced video), crack the code, scan your
 face, win the dog show, and explore the **live Cognee knowledge graph**. There's a
-free, no-login **"Ask about Cognee"** guide on the last page (with an optional one-tap
-free-AI upgrade).
+free, no-login **"Ask AI agent about Cognee"** guide on the last page (with an optional
+one-tap free-AI upgrade).
 
 *(Face ID uses your camera and only works over HTTPS — the Render URL qualifies. If a
 public HF Space is briefly rate-limited, the app degrades gracefully; nothing blocks.)*
@@ -44,7 +44,7 @@ a real Cognee knowledge graph — and the app *shows you that graph*.
 | **2 · Investigation** | Add clues → they're `remember()`-ed into Cognee. Ask **4 AI personalities** who reason over Cognee's `GRAPH_COMPLETION`. Mark clues ✓/✗ or **🔍 fact-check against memory** (green/red). Pinky walks a storyline route as clues are confirmed. | `remember` · `recall` · `GRAPH_COMPLETION` · fact-check vs memory · node_sets |
 | **3 · Access** | Reunion video (Pinky reveals the belly code **8675309**) + **Founder chat (Chow mode)** → enter the code → **facial-recognition scan** (DeepFace). Unlocks on code **and** face. | DeepFace face recognition · accented TTS |
 | **4 · Success** | "You're in" → the **dog-show winning video** plays | AI video |
-| **5 · Cognee** | The **live, real Cognee knowledge graph** (Cognee's own UI, embedded), toggle vs our storyline map, switch datasets. Free **no-login "Ask about Cognee"** guide (+ optional one-tap free-AI upgrade). | Cognee `visualize` graph · datasets · built-in guide + **free Puter.js AI** |
+| **5 · Cognee** | The **live, real Cognee knowledge graph** (Cognee's own UI, embedded), toggle vs our storyline map, switch datasets. Free **no-login "Ask AI agent about Cognee"** guide (+ optional one-tap free-AI upgrade). | Cognee `visualize` graph · datasets · built-in guide + **free Puter.js AI** |
 
 ---
 
@@ -87,7 +87,7 @@ See **`docs/COGNEE_SHOWCASE.md`** for the full mapping and pitch walkthrough.
 | **Real lip-sync** (founder mouths the lines) | **fal.ai `sync-lipsync`** | Hosted | ~cents/clip |
 | **Accented "Mr. Chow" voice** | **edge-tts** (Microsoft Neural, `zh-CN-YunxiNeural`) | **Free/open** | Free, keyless |
 | **Facial recognition gate** | **DeepFace** (SFace + OpenCV) | **Open source** | Free, local |
-| **"Ask about Cognee" chatbot** | **Puter.js** free AI (GPT-4o-mini) | Free, keyless | **User-pays — $0 to us** |
+| **"Ask AI agent about Cognee"** guide | Built-in guide (free, no login) + optional **Puter.js** free AI (GPT-4o-mini) | Free, keyless | **User-pays — $0 to us** |
 
 **Why these choices:** we leaned on **free/open** tooling wherever possible (HF Spaces,
 edge-tts, DeepFace, Puter) so the app is reproducible and cheap, and reserved paid calls
@@ -135,8 +135,11 @@ is denied — the app now tells you this on screen when a face can't be read.
 - **Web Audio reactive avatar** — the cameo's sound bars react to real audio amplitude.
 - **Graceful degradation** — every external dependency (DeepFace, HF Spaces, Puter) falls
   back cleanly so a demo never dead-ends.
-- **Free, keyless help chat** — Puter.js runs client-side so any visitor gets AI help at
-  zero cost to us, with a static FAQ fallback.
+- **"Ask AI agent about Cognee"** — a no-login AI agent on Page 5 answers questions
+  about Cognee (what it is, remember/recall, GRAPH_COMPLETION, datasets, MCP) and helps
+  visitors who are stuck. It runs on a built-in guide by default (free, instant, works
+  on any device); a one-tap opt-in loads **Puter.js** free AI (GPT-4o-mini, client-side,
+  zero cost to us) for deeper answers, and it gracefully falls back to the guide.
 
 ---
 

@@ -1,61 +1,42 @@
-/* Founder cameo — a playful AI "video card" of the Cognee founder.
-   Plays a generated MP4 if one exists at CAMEO.clip; otherwise falls back to an
-   animated portrait + open-source browser speech (Web Speech API) + subtitles.
+/* Founder cameo — Mr. Chow mode. A playful AI "video card" that delivers random
+   Mr. Chow one-liners (pulled from the dataset via /cameo/lines) in a flamboyant
+   Chow voice. Plays a generated MP4 if present, else animated portrait + speech.
    Clearly labelled as an AI parody. */
 
-const CAMEO = {
-  clip: "/media/clips/founder_cameo.mp4",
-  image: "/images/Founder.png",
-  scripts: {
-    intro: [
-      "Hey Wolfpack — founder of Cognee here.",
-      "You lost the dog, but the memory? The memory never forgets.",
-      "Feed me the clues. Let the graph do the thinking. Now go find Pinky!",
-    ],
-    solved: [
-      "You did it! Every clue, connected — that's what memory is for.",
-      "Pinky's at the gymnasium, the code's on her belly. Case closed.",
-      "Graph memory beats forgetting. Ship it!",
-    ],
-  },
-};
+const CAMEO = { clip: "/media/clips/founder_cameo.mp4", image: "/images/Founder.png" };
+
+// Used only if the backend / dataset is unreachable.
+const CHOW_FALLBACK = [
+  "Toodaloo, mother-truckers!",
+  "I walk into rooms and gravity applauds.",
+  "If you can remember the party, Chow wasn't there.",
+  "I don't have an ego. I have facts about myself.",
+  "And that's how you leave a room. You're welcome.",
+];
 
 let cameoOpen = false;
 let cameoShownSolved = false;
 
-function buildCameoOverlay() {
-  const wrap = document.createElement("div");
-  wrap.className = "cameo-overlay";
-  wrap.innerHTML = `
-    <div class="cameo-card">
-      <button class="cameo-close" type="button" aria-label="Close">✕</button>
-      <span class="cameo-tag">AI CAMEO · PARODY</span>
-      <div class="cameo-stage">
-        <video class="cameo-video hidden" playsinline></video>
-        <img class="cameo-face" src="${CAMEO.image}" alt="Cognee founder" />
-        <div class="cameo-scan"></div>
-      </div>
-      <div class="cameo-name">THE FOUNDER OF <b>COGNEE</b></div>
-      <div class="cameo-subtitle" id="cameo-sub">…</div>
-    </div>`;
-  return wrap;
+async function fetchChow(kind = "any", n = 1) {
+  try {
+    const r = await fetch(`/cameo/lines?kind=${kind}&n=${n}`).then((x) => x.json());
+    if (r.lines && r.lines.length) return r.lines;
+  } catch { /* ignore */ }
+  const pool = [...CHOW_FALLBACK].sort(() => Math.random() - 0.5);
+  return pool.slice(0, n);
 }
 
-function speakLines(lines, subEl, onDone) {
+function chowSpeak(lines, subEl, onDone) {
   const synth = window.speechSynthesis;
-  if (!synth) { // no TTS — just show subtitles on a timer
+  if (!synth) {
     let i = 0;
-    const tick = () => {
-      if (i >= lines.length) return onDone && onDone();
-      subEl.textContent = lines[i++];
-      setTimeout(tick, 2600);
-    };
+    const tick = () => { if (i >= lines.length) return onDone && onDone(); subEl.textContent = lines[i++]; setTimeout(tick, 2600); };
     tick();
     return;
   }
   synth.cancel();
   const voices = synth.getVoices();
-  const pick = voices.find((v) => /male|daniel|david|google uk english male/i.test(v.name))
+  const pick = voices.find((v) => /male|daniel|david|fred|rishi|google (uk|us) english/i.test(v.name))
     || voices.find((v) => /en/i.test(v.lang)) || voices[0];
   let i = 0;
   const next = () => {
@@ -64,7 +45,8 @@ function speakLines(lines, subEl, onDone) {
     subEl.textContent = line;
     const u = new SpeechSynthesisUtterance(line);
     if (pick) u.voice = pick;
-    u.rate = 1.02; u.pitch = 0.95;
+    u.pitch = 1.4;   // Chow: high & flamboyant
+    u.rate = 1.08;   // a little fast
     u.onend = next;
     u.onerror = next;
     synth.speak(u);
@@ -72,10 +54,28 @@ function speakLines(lines, subEl, onDone) {
   next();
 }
 
-function openCameo(kind = "intro") {
+function buildCameoOverlay() {
+  const wrap = document.createElement("div");
+  wrap.className = "cameo-overlay";
+  wrap.innerHTML = `
+    <div class="cameo-card">
+      <button class="cameo-close" type="button" aria-label="Close">✕</button>
+      <span class="cameo-tag">AI CAMEO · MR. CHOW</span>
+      <div class="cameo-stage">
+        <video class="cameo-video hidden" playsinline></video>
+        <img class="cameo-face" src="${CAMEO.image}" alt="Cognee founder as Mr. Chow" />
+        <div class="cameo-scan"></div>
+      </div>
+      <div class="cameo-name">THE FOUNDER OF <b>COGNEE</b> · CHOW MODE</div>
+      <div class="cameo-subtitle" id="cameo-sub">…</div>
+      <button class="cameo-another" id="cameo-another" type="button">🎲 Another one!</button>
+    </div>`;
+  return wrap;
+}
+
+async function openCameo(kind = "intro") {
   if (cameoOpen) return;
   cameoOpen = true;
-  const lines = CAMEO.scripts[kind] || CAMEO.scripts.intro;
   const overlay = buildCameoOverlay();
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add("show"));
@@ -83,6 +83,7 @@ function openCameo(kind = "intro") {
   const sub = overlay.querySelector("#cameo-sub");
   const video = overlay.querySelector(".cameo-video");
   const face = overlay.querySelector(".cameo-face");
+  const another = overlay.querySelector("#cameo-another");
 
   const close = () => {
     if (window.speechSynthesis) window.speechSynthesis.cancel();
@@ -94,13 +95,23 @@ function openCameo(kind = "intro") {
   overlay.querySelector(".cameo-close").addEventListener("click", close);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
 
-  // Prefer a generated MP4 if it exists; otherwise animated portrait + TTS.
+  // "Another one!" — one fresh random Chow line, spoken immediately.
+  another.addEventListener("click", async () => {
+    another.disabled = true;
+    const lines = await fetchChow("any", 1);
+    chowSpeak(lines, sub, () => { another.disabled = false; });
+    setTimeout(() => (another.disabled = false), 4000);
+  });
+
+  const lines = await fetchChow(kind, 3);
+
+  // Prefer a generated MP4 if it exists; otherwise animated portrait + Chow voice.
   let usedVideo = false;
   let narrated = false;
   const narrate = () => {
     if (narrated || usedVideo) return;
     narrated = true;
-    speakLines(lines, sub, () => setTimeout(close, 1200));
+    chowSpeak(lines, sub);
   };
   video.src = CAMEO.clip;
   video.onloadeddata = () => {
@@ -109,10 +120,9 @@ function openCameo(kind = "intro") {
     face.classList.add("hidden");
     sub.textContent = "(generated cameo)";
     video.play().catch(() => {});
-    video.onended = close;
+    video.onended = () => chowSpeak(lines, sub);
   };
   video.onerror = narrate;
-  // Safety: if the video never loads within 1.2s, narrate with browser speech.
   setTimeout(narrate, 1200);
 }
 

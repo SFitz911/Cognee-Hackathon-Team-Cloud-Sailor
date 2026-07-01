@@ -14,7 +14,9 @@ Run:
 
 from __future__ import annotations
 
+import csv
 import os
+import random
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
@@ -129,6 +131,38 @@ def validate(req: ValidateIn) -> dict:
     except CogneeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e
     return pack.validate(req.text)
+
+
+# -- Mr. Chow cameo lines -----------------------------------------------------
+_CHOW_KINDS = {
+    "intro": {"Greeting", "Confidence", "Brag", "Party"},
+    "solved": {"Party", "Confidence", "Exit", "Brag"},
+}
+
+
+@lru_cache(maxsize=1)
+def _chow_rows() -> list[dict]:
+    p = Path(__file__).resolve().parent.parent / "data" / "mr_chow_responses.csv"
+    if not p.exists():
+        return []
+    with open(p, encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+@app.get("/cameo/lines")
+def cameo_lines(kind: str = "any", n: int = 1, max_len: int = 72) -> dict:
+    """Random short Mr. Chow one-liners for the founder cameo (from the dataset)."""
+    rows = _chow_rows()
+    cats = _CHOW_KINDS.get(kind)
+    pool = [
+        r["response"].strip() for r in rows
+        if (cats is None or r["category"] in cats) and len(r["response"]) <= max_len
+    ]
+    if not pool:  # fall back to any short line
+        pool = [r["response"].strip() for r in rows if len(r["response"]) <= max_len]
+    random.shuffle(pool)
+    n = max(1, min(n, 5))
+    return {"kind": kind, "lines": pool[:n]}
 
 
 @app.get("/cognee/graph", response_class=HTMLResponse)

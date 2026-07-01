@@ -276,6 +276,12 @@ function travelTick() {
     const passed = Math.round(routeProgress * (ROUTE.length - 1));
     if (passed !== lastPassed) { lastPassed = passed; updateStorylineStates(passed); }
 
+    // Case solved — Pinky reaches the gymnasium: founder cameo (once).
+    if (routeProgress > 0.985 && !cameoShownSolved && typeof openCameo === "function") {
+      cameoShownSolved = true;
+      openCameo("solved");
+    }
+
     const onRoute = pointAlong(ROUTE_PTS, routeProgress);
     const bob = Math.sin(now / 600) * 6;
     pinkyPos.x += (onRoute.x - pinkyPos.x) * 0.06;

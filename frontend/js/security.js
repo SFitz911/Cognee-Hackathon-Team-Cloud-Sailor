@@ -32,22 +32,26 @@ function checkCode() {
   updateGate();
 }
 
-/* Founder chat — Chow drops a random line + talks, then stops (no endless loop). */
+/* Founder chat — plays a real lip-synced clip (baked audio, lips match the voice),
+   exactly like the founder cameo on the last page. Talks once, then stops. */
+let sayClips = null;
 async function chowSays() {
   const line = $("#fc-line"), vid = $("#fc-vid");
-  try { vid.currentTime = 0; vid.play().catch(() => {}); } catch {}
-  if (!chowClips) { try { chowClips = await fetch("/media/audio/chow_manifest.json").then((r) => r.json()); } catch { chowClips = []; } }
-  if (chowClips.length) {
-    const c = chowClips[Math.floor(Math.random() * chowClips.length)];
-    line.textContent = "“" + c.text + "”";
-    try {
-      const a = new Audio(c.file);
-      a.onended = () => { try { vid.pause(); } catch {} };   // stop the video when the line ends
-      a.play().catch(() => {});
-    } catch {}
+  if (!sayClips) {
+    try { sayClips = await fetch("/media/clips/founder_say_manifest.json").then((r) => r.json()); }
+    catch { sayClips = []; }
   }
-  // Safety: if the video is longer than the line, stop it when it ends.
-  vid.onended = () => { try { vid.pause(); } catch {} };
+  if (!sayClips.length) return;                       // nothing to play
+  const c = sayClips[Math.floor(Math.random() * sayClips.length)];
+  line.textContent = "“" + c.text + "”";
+  try {
+    vid.loop = false;
+    vid.muted = false;                                // baked audio matches the lips
+    vid.src = c.file;
+    vid.currentTime = 0;
+    vid.onended = () => { try { vid.pause(); } catch {} };
+    vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+  } catch {}
 }
 
 async function refreshAuthStatus() {

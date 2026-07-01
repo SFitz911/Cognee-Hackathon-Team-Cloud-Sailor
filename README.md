@@ -251,6 +251,23 @@ Real engineering is a sequence of "it works… but" moments. A few that shaped t
   (~15× cheaper than Opus), **per-IP rate limiting** (HTTP 429 past the budget), **tight
   token caps**, key kept **server-side only**, and a **spend cap** in the Anthropic console.
   Lesson: treat any owner-funded API behind a public demo as a spend surface, not a detail.
+
+  **A note to the judges on cost — this runs on pennies.** We were deliberate about
+  minimizing paid resources. The only owner-funded calls are the Claude ones, and they're
+  squeezed on every axis:
+  - **Model:** Claude **Haiku 4.5**, not Opus (~15× cheaper per token).
+  - **Tiny responses:** personas answer in one sentence — `max_tokens` **90 / 40 / 320**.
+  - **Rate limiter with a rolling reset:** each IP gets **30 AI calls per 10 minutes**;
+    it's a **sliding window that automatically frees up** as old calls age out (past the
+    10-minute mark), so legitimate judges never feel it, but no single visitor can spin the
+    meter. Past the budget the API returns a friendly HTTP 429 "please wait" instead of
+    another paid call.
+
+  Put together, a Haiku call at these token caps costs a **fraction of a cent**, and even a
+  visitor maxing out all 30 calls in a window spends **pennies** — hard-bounded by the
+  window and by the Anthropic spend cap. Everything else in the app is **free/open**:
+  Cognee (dev tier), DeepFace (local), edge-tts, the HF Spaces, and the Page-5 help chat
+  (Puter is *user-pays*, $0 to us). **The paid footprint is intentionally minimal.**
 - **Mobile ≠ desktop.** Page 5's graph cramped on phones (locked `100dvh`), so we let it
   scroll with a dedicated graph block; a fixed-width scanner box wouldn't center under a
   `text-align: center` parent (needs `margin: 0 auto`). Small CSS truths, real polish.

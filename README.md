@@ -2,6 +2,14 @@
 
 > **"Build AI that doesn't forget."** — Cognee × WeMakeDevs Hackathon · **Team Cloud Sailor**
 
+## 🎬 Watch the 50-second trailer
+
+[![Watch the Wolfpack Recall trailer](media/images/poster.png)](media/demo/wolfpack_demo.mp4)
+
+**▶ [Click the poster to play the trailer](media/demo/wolfpack_demo.mp4)** — the story
+in 50s (reunion → the founder's Mr. Chow cameo → the tattooed code → the dog-show win →
+the live Cognee graph). For the full interactive experience, open the live app below.
+
 ## ▶️ Try it live (no setup)
 
 ### 👉 **https://wolfpack-recall.onrender.com**

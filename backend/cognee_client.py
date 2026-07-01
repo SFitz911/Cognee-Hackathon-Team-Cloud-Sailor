@@ -103,6 +103,37 @@ class CogneeClient:
         except urllib.error.URLError as e:
             raise CogneeError(f"Cannot reach {self.api_base}{path}: {e}") from e
 
+    def _get_text(self, path: str, *, timeout: float = 45.0) -> str:
+        """GET a path and return the raw response body as text (no JSON parsing)."""
+        req = urllib.request.Request(
+            self.api_base + path, headers={"X-Api-Key": self.api_key}, method="GET"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout, context=self._ssl) as resp:
+                return resp.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", "replace")[:300]
+            raise CogneeError(f"HTTP {e.code} for GET {path}: {body}") from e
+        except urllib.error.URLError as e:
+            raise CogneeError(f"Cannot reach {self.api_base}{path}: {e}") from e
+
+    # -- knowledge-graph visualization --------------------------------------
+    def dataset_id(self, name: Optional[str] = None) -> Optional[str]:
+        """Resolve a dataset name to its Cognee id (defaults to this client's dataset)."""
+        target = name or self.dataset
+        _, rows = self._request("GET", "/api/v1/datasets", timeout=15)
+        for d in rows or []:
+            if isinstance(d, dict) and d.get("name") == target:
+                return d.get("id") or d.get("dataset_id")
+        return None
+
+    def visualize_html(self, dataset: Optional[str] = None) -> str:
+        """Return Cognee's interactive knowledge-graph HTML for the dataset."""
+        dsid = self.dataset_id(dataset)
+        if not dsid:
+            raise CogneeError(f"Dataset '{dataset or self.dataset}' not found on tenant.")
+        return self._get_text(f"/api/v1/visualize?dataset_id={dsid}")
+
     @staticmethod
     def _multipart(fields: dict[str, str], files: list[tuple[str, str, str]]) -> tuple[bytes, str]:
         boundary = f"----cognee{uuid.uuid4().hex}"

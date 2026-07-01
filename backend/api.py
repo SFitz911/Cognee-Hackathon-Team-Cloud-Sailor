@@ -22,6 +22,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -128,6 +129,21 @@ def validate(req: ValidateIn) -> dict:
     except CogneeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e
     return pack.validate(req.text)
+
+
+@app.get("/cognee/graph", response_class=HTMLResponse)
+def cognee_graph() -> HTMLResponse:
+    """Proxy Cognee Cloud's live knowledge-graph visualization for our dataset.
+
+    Served from our origin so the API key stays server-side and the page can be
+    embedded in an iframe without hitting Cognee's X-Frame-Options.
+    """
+    client = get_cognee()
+    try:
+        html = client.visualize_html()
+    except CogneeError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from e
+    return HTMLResponse(content=html)
 
 
 @app.get("/memory/search")

@@ -53,9 +53,12 @@ FastAPI backend  (backend/api.py)
 │   ├── clips/            #   movie clips (the films we produce)
 │   ├── posters/          #   poster variants
 │   └── audio/            #   voice memos / TTS
+├── cognee/               # Cognee "used properly" — ontology + skill
+│   ├── ontology.ttl      #   Memory Schema for the case (typed entities)
+│   └── skills/wolfpack-recall.md  # procedural playbook (Cognee Skill format)
 ├── data/seed_clues.json  # the case clue pack
 ├── scripts/              # seed.py · gen_poster.py · gen_poster_hf.py
-├── docs/                 # OUTLINE.md · BUILD_PLAN.md
+├── docs/                 # OUTLINE.md · BUILD_PLAN.md · COGNEE_SHOWCASE.md
 └── archive/              # earlier prototypes (kept for reference)
 ```
 

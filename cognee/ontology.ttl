@@ -1,0 +1,40 @@
+@prefix wr:  <https://cloudsailor.dev/wolfpack#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# ============================================================
+# Wolfpack Recall — case ontology (Hangover 4: Berlin)
+# Load at cognify time so Cognee grounds extracted entities into
+# these canonical types instead of ad-hoc labels:
+#   cognee.cognify(ontology_file_path="cognee/ontology.ttl")
+# In Cognee Cloud, import this under Explore -> Memory Schema.
+# ============================================================
+
+wr:Ontology a owl:Ontology ; rdfs:label "Wolfpack Recall Case Ontology" .
+
+# ---- Classes (entity types) --------------------------------
+wr:Dog       a owl:Class ; rdfs:label "Dog" ;      rdfs:comment "The missing pet, e.g. Pinky." .
+wr:Person    a owl:Class ; rdfs:label "Person" ;   rdfs:comment "Wolfpack members and strangers." .
+wr:Location  a owl:Class ; rdfs:label "Location" ; rdfs:comment "Bar, tattoo parlor, transit, gymnasium." .
+wr:Clue      a owl:Class ; rdfs:label "Clue" ;     rdfs:comment "A recovered piece of evidence." .
+wr:Code      a owl:Class ; rdfs:label "Code" ;     rdfs:comment "The locker code tattooed on the dog's belly." .
+wr:Event     a owl:Class ; rdfs:label "Event" ;    rdfs:comment "A timestamped beat of the night." .
+
+# ---- Canonical individuals (dedupe targets) ----------------
+wr:Pinky            a wr:Dog ;      rdfs:label "Pinky" .
+wr:Markus           a wr:Person ;   rdfs:label "Markus (Locker Guy)" .
+wr:KarlovciGymnasium a wr:Location ; rdfs:label "Karlovci Gymnasium" ;
+    rdfs:comment "Karlovacka gimnazija, Sremski Karlovci, Serbia (founded 1791). Also 'the gym', 'the school', 'Sporthalle'." .
+wr:BerlinInk        a wr:Location ; rdfs:label "Berlin Ink (tattoo parlor)" .
+wr:ZumRosaHund      a wr:Location ; rdfs:label "Zum Rosa Hund (bar)" .
+wr:BerlinZoo        a wr:Location ; rdfs:label "Berlin Zoo" ; rdfs:comment "Refuted sighting — closed after midnight, no ticket." .
+wr:LockerCode       a wr:Code ;     rdfs:label "Locker 7 code" .
+
+# ---- Object properties (relationships) ---------------------
+wr:carries    a owl:ObjectProperty ; rdfs:domain wr:Dog ;    rdfs:range wr:Code ;     rdfs:label "carries" .
+wr:opens      a owl:ObjectProperty ; rdfs:domain wr:Code ;   rdfs:range wr:Location ; rdfs:label "opens" .
+wr:seenAt     a owl:ObjectProperty ; rdfs:domain wr:Dog ;    rdfs:range wr:Location ; rdfs:label "seen at" .
+wr:tattooedAt a owl:ObjectProperty ; rdfs:domain wr:Dog ;    rdfs:range wr:Location ; rdfs:label "tattooed at" .
+wr:guards     a owl:ObjectProperty ; rdfs:domain wr:Person ; rdfs:range wr:Location ; rdfs:label "guards" .
+wr:evidenceFor a owl:ObjectProperty ; rdfs:domain wr:Clue ;  rdfs:range wr:Event ;    rdfs:label "evidence for" .

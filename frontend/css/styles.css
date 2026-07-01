@@ -392,6 +392,18 @@ textarea:focus, input:focus, select:focus {
   width: 100%; height: 440px; background: #09070c;
   border: 1px solid var(--line); border-radius: 16px; overflow: hidden;
 }
+iframe.graph-big { border: 1px solid var(--line); background: #fff; }
+.graph-toggle { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.gtab {
+  background: #14111a; color: var(--ink-dim); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  font-family: "Inter", sans-serif; transition: all .18s var(--ease);
+}
+.gtab:hover { color: var(--ink); border-color: var(--magenta); }
+.gtab.active {
+  color: #150a10; background: linear-gradient(135deg, var(--magenta), var(--rust));
+  border-color: transparent; box-shadow: 0 4px 16px rgba(255,61,139,0.3);
+}
 .graph-legend {
   display: flex; gap: 18px; justify-content: center; margin: 0 0 12px;
   font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 1px; color: var(--ink-faint);

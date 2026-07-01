@@ -41,8 +41,12 @@
         </figcaption>
       </figure>
 
-      <h3 class="stage-label">THE NIGHT, MAPPED — Pinky walks the storyline route; each clue she confirms (green) carries her closer to the gym</h3>
-      <div class="graph-legend">
+      <div class="graph-toggle">
+        <button id="tab-map" class="gtab active" type="button">🗺️ Storyline map</button>
+        <button id="tab-brain" class="gtab" type="button">🧠 Cognee Brain (live memory)</button>
+      </div>
+      <h3 class="stage-label" id="graph-caption">THE NIGHT, MAPPED — Pinky walks the storyline route; each clue she confirms (green) carries her closer to the gym</h3>
+      <div class="graph-legend" id="graph-legend">
         <span><i class="lg-route"></i> storyline route</span>
         <span><i class="lg-path"></i> Pinky's path</span>
         <span><i class="lg lg-pending"></i> unverified</span>
@@ -50,6 +54,7 @@
         <span><i class="lg lg-refuted"></i> false</span>
       </div>
       <div id="graph" class="graph-big"></div>
+      <iframe id="brain-frame" class="graph-big hidden" title="Cognee knowledge graph" loading="lazy"></iframe>
     </div>
 
     <!-- Ask the wolfpack -->

@@ -343,6 +343,23 @@ $("#add-clue").addEventListener("click", () => {
 $("#investigate").addEventListener("click", investigate);
 $("#load-seed").addEventListener("click", loadSeed);
 
+// Toggle: our storyline map  <->  Cognee's real knowledge graph (live memory).
+let brainLoaded = false;
+function showView(which) {
+  const brain = which === "brain";
+  $("#tab-brain").classList.toggle("active", brain);
+  $("#tab-map").classList.toggle("active", !brain);
+  $("#brain-frame").classList.toggle("hidden", !brain);
+  $("#graph").classList.toggle("hidden", brain);
+  $("#graph-legend").classList.toggle("hidden", brain);
+  $("#graph-caption").textContent = brain
+    ? "COGNEE BRAIN — the actual knowledge graph Cognee built from these clues (not a mockup)"
+    : "THE NIGHT, MAPPED — Pinky walks the storyline route; each clue she confirms (green) carries her closer to the gym";
+  if (brain && !brainLoaded) { $("#brain-frame").src = "/cognee/graph"; brainLoaded = true; }
+}
+$("#tab-map").addEventListener("click", () => showView("map"));
+$("#tab-brain").addEventListener("click", () => showView("brain"));
+
 // Delegated clue actions: ✓ true · ✗ false · 🔍 check (Cognee fact-check).
 $("#clue-list").addEventListener("click", (e) => {
   const btn = e.target.closest("button[data-cid]");

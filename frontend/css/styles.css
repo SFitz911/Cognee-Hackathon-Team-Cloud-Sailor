@@ -533,3 +533,65 @@ iframe.graph-big { border: 1px solid var(--line); background: #fff; }
   .t-berlin { font-size: 60px; }
   .poster-tag { font-size: 13px; }
 }
+
+/* ============================================================
+   STORYLINE SIDEBAR (progress stepper)
+   ============================================================ */
+.app-shell { display: flex; gap: 22px; max-width: 1320px; margin: 0 auto; padding: 18px 28px 40px; align-items: flex-start; }
+.app-main { flex: 1; min-width: 0; }
+.storyline-rail {
+  flex: 0 0 240px; position: sticky; top: 88px;
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+  border: 1px solid var(--line); border-radius: var(--r); padding: 16px 14px;
+}
+.rail-title { font-family: "Bebas Neue", sans-serif; letter-spacing: 3px; font-size: 18px; margin: 0 0 8px; color: var(--ink); }
+.rail-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 0 0 14px; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--ink-faint); }
+.rail-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.sdot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.sdot.done { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.sdot.current { background: var(--magenta); box-shadow: 0 0 6px var(--magenta); }
+.sdot.upcoming { background: #eab308; box-shadow: 0 0 6px #eab308; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.step {
+  display: flex; align-items: center; gap: 10px; padding: 10px 11px;
+  border-radius: 11px; border: 1px solid var(--line); background: #100d16;
+  position: relative; transition: border-color .3s var(--ease), box-shadow .3s var(--ease), opacity .3s;
+}
+.step-marker {
+  flex: 0 0 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; background: #0c0a11; border: 1.5px solid var(--line); color: var(--ink-dim);
+}
+.step-body { display: flex; flex-direction: column; min-width: 0; }
+.step-name { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.15; }
+.step-sub { font-size: 10.5px; color: var(--ink-faint); }
+.step-count {
+  margin-left: auto; min-width: 20px; text-align: center; font-size: 11px; font-weight: 700;
+  color: var(--ink-faint); background: #0c0a11; border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px;
+}
+.step-count.has { color: #150a10; background: var(--cyan); border-color: transparent; }
+
+/* --- the three states: green reached · pink now · yellow to-do --- */
+.step.done { border-color: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.30); }
+.step.done .step-marker { border-color: #22c55e; color: #7fdca0; }
+.step.current { border-color: var(--magenta); box-shadow: 0 0 16px rgba(255,61,139,0.5); animation: stepPulse 1.8s var(--ease) infinite; }
+.step.current .step-marker { border-color: var(--magenta); color: var(--magenta); }
+.step.upcoming { border-color: #7a6412; box-shadow: 0 0 8px rgba(234,179,8,0.18); opacity: 0.9; }
+.step.upcoming .step-marker { border-color: #eab308; color: #eab308; }
+
+/* goal = the gymnasium button */
+.step.goal { padding: 13px 12px; }
+.step.goal .step-name { font-family: "Bebas Neue", sans-serif; letter-spacing: 1.5px; font-size: 16px; }
+.step.goal.done { background: linear-gradient(135deg, rgba(34,197,94,0.18), transparent); }
+.step.goal.current { background: linear-gradient(135deg, rgba(255,61,139,0.16), transparent); }
+
+@keyframes stepPulse { 0%,100% { box-shadow: 0 0 12px rgba(255,61,139,0.4); } 50% { box-shadow: 0 0 22px rgba(255,61,139,0.75); } }
+
+/* sidebar on mobile: full width above the content, steps scroll horizontally */
+@media (max-width: 900px) {
+  .app-shell { flex-direction: column; gap: 14px; padding: 14px 16px 32px; }
+  .storyline-rail { position: static; flex: none; width: 100%; }
+  .steps { flex-direction: row; overflow-x: auto; padding-bottom: 6px; }
+  .step { flex: 0 0 200px; }
+  .rail-legend { margin-bottom: 10px; }
+}

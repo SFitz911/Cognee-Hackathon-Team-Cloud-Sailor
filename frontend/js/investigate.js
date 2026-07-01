@@ -47,6 +47,7 @@ async function addClue(text, node_set) {
   clues.push(clue);
   addClueNode(clue);          // appears under Pinky immediately
   renderClues();
+  updateStorylineCounts();    // tally clues per storyline step
   try {
     const res = await api("/clues", {
       method: "POST",
@@ -115,6 +116,57 @@ const ROUTE_PTS = ROUTE.map((r) => ({ x: r.x, y: r.y }));
 let pinkyPos = { x: ROUTE[0].x, y: ROUTE[0].y - 55 };
 let routeProgress = 0; // eased 0..1 position along the route
 
+/* ---- Storyline sidebar stepper (green reached · pink now · yellow to-do) ---- */
+const STEP_META = [
+  { id: "r_apt", name: "The Apartment", sub: "Berlin · they wake up", kw: /apartment|woke|trashed|hungover/i },
+  { id: "r_bar", name: "Zum Rosa Hund", sub: "the bar", kw: /bar|rosa hund|receipt|beer|jager|photo|flyer|dog show/i },
+  { id: "r_ink", name: "Berlin Ink", sub: "the tattoo parlor", kw: /tattoo|ink|belly/i },
+  { id: "r_bus", name: "FlixBus to Serbia", sub: "Berlin → Novi Sad", kw: /flixbus|\bbus\b|novi sad|serbia|u-?bahn|\bu1\b/i },
+  { id: "r_gym", name: "Karlovci Gymnasium", sub: "Locker 7 · the goal", kw: /gym|gymnasium|karlovci|gimnazija|locker|markus|sporthalle|code/i, goal: true },
+];
+let lastPassed = -1;
+
+function renderStoryline() {
+  const ol = $("#storyline-steps");
+  if (!ol) return;
+  ol.innerHTML = "";
+  STEP_META.forEach((s, i) => {
+    const li = document.createElement("li");
+    li.className = "step upcoming" + (s.goal ? " goal" : "");
+    li.dataset.idx = i;
+    li.innerHTML = `
+      <span class="step-marker">${s.goal ? "🏁" : i + 1}</span>
+      <span class="step-body">
+        <span class="step-name">${s.name}</span>
+        <span class="step-sub">${s.sub}</span>
+      </span>
+      <span class="step-count" title="clues found here">0</span>`;
+    ol.appendChild(li);
+  });
+  updateStorylineCounts();
+  updateStorylineStates(0);
+}
+
+function updateStorylineCounts() {
+  const ol = $("#storyline-steps");
+  if (!ol) return;
+  STEP_META.forEach((s, i) => {
+    const n = clues.filter((c) => s.kw.test(c.text)).length;
+    const el = ol.querySelector(`.step[data-idx="${i}"] .step-count`);
+    if (el) { el.textContent = n; el.classList.toggle("has", n > 0); }
+  });
+}
+
+function updateStorylineStates(passedIndex) {
+  const ol = $("#storyline-steps");
+  if (!ol) return;
+  ol.querySelectorAll(".step").forEach((li) => {
+    const i = Number(li.dataset.idx);
+    li.classList.remove("done", "current", "upcoming");
+    li.classList.add(i < passedIndex ? "done" : i === passedIndex ? "current" : "upcoming");
+  });
+}
+
 function buildGraph() {
   const el = $("#graph");
   if (!window.vis || !el) return;
@@ -148,6 +200,7 @@ function buildGraph() {
     interaction: { hover: true, dragView: true, zoomView: true },
   });
   net.fit({ animation: false });
+  renderStoryline();
   requestAnimationFrame(travelTick);
 }
 
@@ -218,6 +271,10 @@ function travelTick() {
     const trueCount = clues.filter((c) => c.verdict === "true").length;
     const target = Math.min(1, trueCount / Math.max(1, ROUTE.length - 1));
     routeProgress += (target - routeProgress) * 0.04; // ease toward target
+
+    // Update the storyline stepper when Pinky crosses into a new waypoint.
+    const passed = Math.round(routeProgress * (ROUTE.length - 1));
+    if (passed !== lastPassed) { lastPassed = passed; updateStorylineStates(passed); }
 
     const onRoute = pointAlong(ROUTE_PTS, routeProgress);
     const bob = Math.sin(now / 600) * 6;

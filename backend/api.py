@@ -45,6 +45,19 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def _no_cache_code(request, call_next):
+    """Serve code (HTML/JS/CSS) fresh so browsers never run stale UI.
+
+    Media (mp4/mp3/png) stays cacheable — those are large and immutable.
+    """
+    response = await call_next(request)
+    path = request.url.path.lower()
+    if path.endswith((".html", ".js", ".css")) or path == "/":
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return response
+
+
 # -- lazy singletons ---------------------------------------------------------
 @lru_cache(maxsize=1)
 def get_cognee() -> CogneeClient:

@@ -622,9 +622,11 @@ iframe.explorer-graph { background: #fff; }
 .ask-chips button { background: #14111a; color: var(--cyan); border: 1px solid var(--line); border-radius: 999px;
   padding: 5px 10px; font-size: 11px; cursor: pointer; }
 .ask-chips button:hover { border-color: var(--cyan); }
-.ask-form { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.ask-form { display: flex; gap: 8px; padding: 10px 12px 4px; border-top: 1px solid var(--line); }
 .ask-form input { flex: 1; }
 .ask-form .btn-primary { padding: 10px 14px; font-size: 12px; }
+.ask-powered { text-align: center; padding: 4px 12px 10px; font-size: 10px; color: var(--ink-faint); font-family: "JetBrains Mono", monospace; }
+.ask-powered b { color: var(--cyan); }
 
 /* ============================================================
    MOBILE / RESPONSIVE (phones, iPhone-friendly)
